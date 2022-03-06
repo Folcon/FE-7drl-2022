@@ -239,7 +239,7 @@
                  (interpose (ui/gap padding 2)
                    (map #(ui/label (str %) font-small fill-black) (repeat 5 "Test Message"))))])))))))
 
-(def ui
+(def map-ui-view
   (ui/on-key-down #(type (:hui.event.key/key %))
     (ui/padding padding padding
       (ui/dynamic ctx [{:keys [scale face-ui]} ctx]
@@ -273,7 +273,7 @@
 (def ui-views
   ;; exploiting the fact that as long as array-map doesn't grow, it keeps insertion order
   (array-map
-    "Map" ui))
+    "Map" map-ui-view))
 
 (def *selected (atom (ffirst ui-views)))
 
