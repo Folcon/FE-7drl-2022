@@ -106,19 +106,20 @@
                  (case (colour word letter idx)
                    :green  fill-green
                    :yellow fill-yellow
-                   :gray   fill-dark-gray))]
+                   :gray   fill-dark-gray))
+          terrain guesses]
       (ui/column
         (interpose (ui/gap 0 padding)
-          (for [guess guesses]
+          (for [tile-row terrain]
             (ui/row
               (interpose (ui/gap padding 0)
-                (for [[letter idx] (map vector guess (range))]
-                  (ui/fill (fill letter idx)
+                (for [[tile idx] (map vector tile-row (range))]
+                  (ui/fill (fill tile idx)
                     (ui/width 50
                       (ui/halign 0.5
                         (ui/height 50
                           (ui/valign 0.5
-                            (ui/label (str letter) font-large fill-white)))))))))))
+                            (ui/label (str tile) font-large fill-white)))))))))))
         (when-not (won? state)
           (let [colors (colours word guesses)]
             (list
