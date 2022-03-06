@@ -66,14 +66,6 @@ jobs:
         if: ${{ matrix.os == 'windows-latest' }}
         run: jpackage @jpackage/common @jpackage/windows ${{ steps.app_version.outputs.app_version_arg }}
 
-      - name: recursively print info again in current directory macos + linux
-        if: ${{ matrix.os != 'windows-latest' }}
-        run: ls && find . -maxdepth 2 -type d -exec ls -ld "{}" \;
-
-      - name: recursively print info again in current directory windows
-        if: ${{ matrix.os == 'windows-latest' }}
-        run: tree /F
-
       - name: rename file on linux
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: mv fruit-economy_1.0-1_amd64.deb fruit-economy_${{ env.RELEASE_VERSION }}_amd64.deb
