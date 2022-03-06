@@ -58,7 +58,10 @@
   {:word    (rand-nth solutions)
    :guesses (rand-tile-seqs 10)
    :typing  ""
-   :units (into {} (map (juxt (juxt :x :y) identity)) (repeatedly 10 #(hash-map :x (inc (rand-int 15)) :y (inc (rand-int 10)) :glyph (rand-nth (vals units)))))})
+   :units (into {} (map (juxt (juxt :x :y) identity)) (repeatedly 10 #(hash-map :x (inc (rand-int 15)) :y (inc (rand-int 10)) :glyph (rand-nth (vals units)))))
+   :quests (into (sorted-map) {"A Quest!" {:quest/name "A Quest!"}
+                               "Another Quest!" {:quest/name "Another Quest!"}})
+   :selected-quest "A Quest!"})
 
 (def *state (atom (empty-state)))
 
@@ -197,6 +200,39 @@
                (ui/valign 0.5
                  (ui/label char font-small (if (some? color) fill-white fill-black)))))))))))
 
+(declare *selected-ui-view)
+
+(defn quest-ui-btn
+  ([quest-name] (quest-ui-btn quest-name {:width 100 :code quest-name}))
+  ([quest-name {:keys [width code selected-quest]}]
+   (ui/clickable
+     #(do
+        (reset! *selected-ui-view "Quest")
+        (swap! *state assoc :selected-quest quest-name))
+     (ui/dynamic ctx [{:keys [font-small fill-green fill-yellow fill-dark-gray fill-light-gray fill-black fill-white]} ctx
+                      color (get (:colors ctx) quest-name)
+                      color (if (= selected-quest quest-name) :green color)]
+       (ui/fill
+         (case color
+           :green  fill-green
+           :yellow fill-yellow
+           :gray   fill-dark-gray
+           nil     fill-light-gray)
+         (ui/width width
+           (ui/halign 0.5
+             (ui/height 35
+               (ui/valign 0.5
+                 (ui/label quest-name font-small (if (some? color) fill-white fill-black)))))))))))
+
+(def quest-detail-ui
+  (ui/dynamic ctx [{:keys [font-large stroke-light-gray stroke-dark-gray fill-green fill-yellow fill-dark-gray fill-white fill-black]} ctx
+                   {:keys [quests selected-quest] :as state} @*state]
+    (let [fill (fn [tile]
+                 (paint/fill (render-tile-colour tile)))
+          unit-glyph (fn [_tile x y] (get-in units [[x y] :glyph] " "))]
+      (ui/column
+        (ui/label (pr-str (get quests selected-quest)) font-large fill-black)))))
+
 (def keyboard
   (ui/dynamic ctx [{:keys [font-small fill-light-gray fill-black]} ctx
                    {:keys [word guesses]} @*state]
@@ -263,6 +299,12 @@
                   #(reset! *state (empty-state))
                   (ui/padding 10 10
                     (ui/label "↻ Reset" font-small fill-black))))
+              (ui/halign 0.5
+                (ui/dynamic ctx [_ (:selected-quest @*state)]
+                  (ui/row
+                    (interpose (ui/gap 2 padding)
+                      (for [[name _quest] (:quests @*state)]
+                        (quest-ui-btn name {:width 100 :code name :selected-quest (:selected-quest @*state)}))))))
               (ui/gap 0 padding)
               [:stretch 1 nil]
               (ui/halign 0.5 field)
@@ -270,10 +312,71 @@
               (ui/gap 0 padding)
               (ui/halign 0.5 message-log))))))))
 
+(def quest-ui-view
+  (ui/on-key-down #(type (:hui.event.key/key %))
+    (ui/padding padding padding
+      (ui/dynamic ctx [{:keys [scale face-ui]} ctx]
+        (let [font-small (Font. ^Typeface typeface (float (* scale 13)))
+              fill-black (paint/fill 0xFF000000)
+              fill-light-gray (paint/fill 0xFFD4D6DA)]
+          (ui/with-context
+            {:font-large      (Font. ^Typeface typeface (float (* scale 26)))
+             :font-small      font-small
+             :fill-white      (paint/fill 0xFFFFFFFF)
+             :fill-black      fill-black
+             :fill-light-gray fill-light-gray
+             :fill-dark-gray  (paint/fill 0xFF777C7E)
+             :fill-green      (paint/fill 0xFF6AAA64)
+             :fill-yellow     (paint/fill 0xFFC9B457)
+             :stroke-light-gray (paint/stroke 0xFFD4D6DA (* 2 scale))
+             :stroke-dark-gray  (paint/stroke 0xFF777C7E (* 2 scale))}
+            (ui/column
+              (ui/halign 0.5
+                (ui/clickable
+                  #(reset! *state (empty-state))
+                  (ui/padding 10 10
+                    (ui/label "↻ Reset" font-small fill-black))))
+              (ui/halign 0.5
+                (ui/dynamic ctx [_ (:selected-quest @*state)]
+                  (ui/row
+                    (interpose (ui/gap 2 padding)
+                      (for [[name _quest] (:quests @*state)]
+                        (quest-ui-btn name {:width 100 :code name :selected-quest (:selected-quest @*state)}))))))
+              (ui/gap 0 padding)
+              [:stretch 1 nil]
+              (ui/halign 0.5 quest-detail-ui)
+              [:stretch 1 nil]
+              (ui/gap 0 padding)
+              (ui/halign 0.5 message-log))))))))
+
+(def character-ui-view
+  (ui/on-key-down #(type (:hui.event.key/key %))
+    (ui/padding padding padding
+      (ui/dynamic ctx [{:keys [scale face-ui]} ctx]
+        (let [font-small (Font. ^Typeface typeface (float (* scale 13)))
+              fill-black (paint/fill 0xFF000000)
+              fill-light-gray (paint/fill 0xFFD4D6DA)]
+          (ui/with-context
+            {:font-large      (Font. ^Typeface typeface (float (* scale 26)))
+             :font-small      font-small
+             :fill-white      (paint/fill 0xFFFFFFFF)
+             :fill-black      fill-black
+             :fill-light-gray fill-light-gray
+             :fill-dark-gray  (paint/fill 0xFF777C7E)
+             :fill-green      (paint/fill 0xFF6AAA64)
+             :fill-yellow     (paint/fill 0xFFC9B457)
+             :stroke-light-gray (paint/stroke 0xFFD4D6DA (* 2 scale))
+             :stroke-dark-gray  (paint/stroke 0xFF777C7E (* 2 scale))}
+            (ui/column
+              (ui/label "Character" font-small fill-black))))))))
+
+
 (def ui-views
   ;; exploiting the fact that as long as array-map doesn't grow, it keeps insertion order
   (array-map
-    "Map" map-ui-view))
+    "Map" map-ui-view
+    "Quest" quest-ui-view
+    "Character" character-ui-view))
 
 (def *selected-ui-view (atom (ffirst ui-views)))
 
