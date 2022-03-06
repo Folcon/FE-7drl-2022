@@ -64,7 +64,7 @@
         (if (contains? dictionary typing)
           (swap! *state #(-> % (assoc :typing "") (update :guesses conj typing))))))))
 
-(defn color [word letter idx]
+(defn colour [word letter idx]
   (cond
     (= (str (nth word idx)) (str letter)) :green
     (str/includes? word (str letter)) :yellow
@@ -78,17 +78,17 @@
     (= :yellow a) :yellow
     :else         :gray))
 
-(defn colors [word guesses]
+(defn colours [word guesses]
   (apply merge-with merge-colors {}
     (for [guess guesses
           [letter idx] (map vector guess (range))]
-      {(str letter) (color word letter idx)})))
+      {(str letter) (colour word letter idx)})))
 
 (def field
   (ui/dynamic ctx [{:keys [font-large stroke-light-gray stroke-dark-gray fill-green fill-yellow fill-dark-gray fill-white fill-black]} ctx
                    {:keys [word guesses typing] :as state} @*state]
     (let [fill (fn [letter idx]
-                 (case (color word letter idx)
+                 (case (colour word letter idx)
                    :green  fill-green
                    :yellow fill-yellow
                    :gray   fill-dark-gray))]
@@ -105,7 +105,7 @@
                           (ui/valign 0.5
                             (ui/label (str letter) font-large fill-white)))))))))))
         (when-not (won? state)
-          (let [colors (colors word guesses)]
+          (let [colors (colours word guesses)]
             (list
               (ui/gap 0 padding)
               (ui/row
@@ -156,7 +156,7 @@
 (def keyboard
   (ui/dynamic ctx [{:keys [font-small fill-light-gray fill-black]} ctx
                    {:keys [word guesses]} @*state]
-    (ui/with-context {:colors (colors word guesses)}
+    (ui/with-context {:colors (colours word guesses)}
       (ui/column
         (ui/gap 0 padding)
         (ui/halign 0.5
