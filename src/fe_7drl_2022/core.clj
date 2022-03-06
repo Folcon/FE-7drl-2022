@@ -85,6 +85,31 @@
     (str/includes? word (str letter)) :yellow
     :else :gray))
 
+(defn fill-colour
+  "an unchecked-int or r g b should be between 0 and 255"
+  ([uint] (unchecked-int uint))
+  ([r g b]
+   (unchecked-int
+     (bit-or
+       (unchecked-int 0xFF000000)
+       (bit-shift-left r 16)
+       (bit-shift-left g 8)
+       (bit-shift-left b 0)))))
+
+(defn render-tile-colour [terrain]
+  (condp = terrain
+    :beach (fill-colour 230 236 172) #_(rand-nth [(fill-colour 117 139 171) (fill-colour 230 236 172)])
+    :desert (fill-colour 246 244 118)
+    :forest (fill-colour 64 88 37)
+    :grassland (fill-colour 78 138 53)
+    :jungle (fill-colour 66 108 40)
+    :mountain (fill-colour 73 66 52)
+    :snow-mountain (fill-colour 86 82 73)
+    :ocean (rand-nth [(fill-colour 87 119 197) (fill-colour 87 102 153) (fill-colour 87 102 153)])
+    :snow (fill-colour 247 246 247)
+    :tundra (fill-colour 153 153 155)
+    (fill-colour 0 0 0)))
+
 (defn merge-colors [a b]
   (cond
     (= :green b)  :green
@@ -102,11 +127,8 @@
 (def field
   (ui/dynamic ctx [{:keys [font-large stroke-light-gray stroke-dark-gray fill-green fill-yellow fill-dark-gray fill-white fill-black]} ctx
                    {:keys [word guesses typing] :as state} @*state]
-    (let [fill (fn [letter idx]
-                 (case (colour word letter idx)
-                   :green  fill-green
-                   :yellow fill-yellow
-                   :gray   fill-dark-gray))
+    (let [fill (fn [tile _idx]
+                 (paint/fill (render-tile-colour tile)))
           terrain guesses]
       (ui/column
         (interpose (ui/gap 0 padding)
