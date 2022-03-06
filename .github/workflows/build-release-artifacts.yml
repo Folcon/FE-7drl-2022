@@ -1,0 +1,277 @@
+name: Build Release Artifacts
+on:
+  push:
+    tags:
+      - v*
+#  release:
+#    types: [created]
+#  workflow_run:
+#    workflows: [Release]
+#    types:
+#      - completed
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [
+            ubuntu-latest,
+            macos-latest,
+            windows-latest
+        ]
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: prepare java
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - name: install clojure
+        uses: DeLaGuardo/setup-clojure@3.7
+        with:
+          lein: latest
+
+      - name: build uberjar
+        run: lein uberjar
+
+      - name: create version number for app
+        shell: bash
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/v}" >> $GITHUB_ENV
+
+      - name: set conditional app-version arg
+        id: app_version
+        shell: bash
+        run: |
+          [[ ${RELEASE_VERSION%.*.*} == 0 ]] \
+          && echo ::set-output name=app_version_arg::"" \
+          || echo ::set-output name=app_version_arg::$(echo --app-version ${RELEASE_VERSION})
+
+      - name: did we record app-version or the RELEASE_VERSION?
+        shell: bash
+        run: echo "${{ steps.app_version.outputs.app_version_arg }}" ; echo "${RELEASE_VERSION}" ; echo "${{ env.RELEASE_VERSION }}"
+
+      - name: build package on linux
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        run: jpackage @jpackage/common @jpackage/linux ${{ steps.app_version.outputs.app_version_arg }}
+
+      - name: build package on macos
+        if: ${{ matrix.os == 'macos-latest' }}
+        run: jpackage @jpackage/common @jpackage/mac ${{ steps.app_version.outputs.app_version_arg }}
+
+      - name: build package on windows
+        shell: bash
+        if: ${{ matrix.os == 'windows-latest' }}
+        run: jpackage @jpackage/common @jpackage/windows ${{ steps.app_version.outputs.app_version_arg }}
+
+      - name: recursively print info again in current directory macos + linux
+        if: ${{ matrix.os != 'windows-latest' }}
+        run: ls && find . -maxdepth 2 -type d -exec ls -ld "{}" \;
+
+      - name: recursively print info again in current directory windows
+        if: ${{ matrix.os == 'windows-latest' }}
+        run: tree /F
+
+      - name: rename file on linux
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        run: mv fruit-economy_1.0-1_amd64.deb fruit-economy_${{ env.RELEASE_VERSION }}_amd64.deb
+
+      - name: rename file on macos
+        if: ${{ matrix.os == 'macos-latest' }}
+        run: mv Fruit\ Economy-1.0.dmg Fruit_Economy-${{ env.RELEASE_VERSION }}.dmg
+
+      - name: rename file on windows
+        shell: bash
+        if: ${{ matrix.os == 'windows-latest' }}
+        run: mv Fruit\ Economy/ Fruit_Economy/
+
+      - name: zip + rename file on windows
+        uses: vimtor/action-zip@v1
+        if: ${{ matrix.os == 'windows-latest' }}
+        with:
+          files: Fruit_Economy/
+          dest: Fruit_Economy-${{ env.RELEASE_VERSION }}.zip
+
+      - name: codesign executable on macos
+        if: ${{ matrix.os == 'macos-latest' }}
+        env:
+          MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+          MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
+          MACOS_IDENTITY: ${{ secrets.MACOS_IDENTITY }}
+          DEVELOPER_ID: ${{ secrets.DEVELOPER_ID }}
+          PRIMARY_BUNDLE_ID: ${{ secrets.DEVELOPER_ID }}
+          NOTARY_USERNAME: ${{ secrets.NOTARY_USERNAME }}
+          NOTARY_PASSWORD: ${{ secrets.NOTARY_PASSWORD }}
+        run: |
+          echo "=> Generate Local Password"
+          export PASSWORD=$(echo $RANDOM | git hash-object --stdin | head -c 20)
+          echo "=> Load Certificate to Local System"
+          echo $MACOS_CERTIFICATE | base64 --decode > certificate.p12
+          echo "=> Create New Keychain"
+          security create-keychain -p $PASSWORD build.keychain
+          echo "=> Assign Keychain as System Default"
+          security default-keychain -s build.keychain
+          echo "=> Unlock Keychain"
+          security unlock-keychain -p $PASSWORD build.keychain
+          echo "=> Load Local System Certificate to Keychain"
+          security import certificate.p12 -k build.keychain -P $MACOS_CERTIFICATE_PWD -T /usr/bin/codesign
+          echo "=> Set Permissions on Keychain Certificate"
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k $PASSWORD build.keychain
+          echo "=> Mount DMG"
+          hdiutil attach Fruit_Economy-${{ env.RELEASE_VERSION }}.dmg
+          echo "=> Copy App to Local Workspace"
+          cp -r /Volumes/Fruit\ Economy/Fruit\ Economy.app .
+          echo "=> Codesign App Native Libs"
+          /usr/bin/codesign -vvv --force --options runtime --timestamp --deep -s $MACOS_IDENTITY --entitlements build/entitlement.plist Fruit\ Economy.app/Contents/runtime/Contents/MacOS/libjli.dylib -v
+          echo "=> Codesign App"
+          /usr/bin/codesign -vvv --force --options runtime --timestamp --deep -s $MACOS_IDENTITY --entitlements build/entitlement.plist Fruit\ Economy.app -v
+          echo "=> Create DMG Data Directory"
+          mkdir dmg_dir
+          echo "=> Copy App into DMG Data Directory"
+          cp -r Fruit\ Economy.app dmg_dir/Fruit\ Economy.app
+          echo "=> Create Writable DMG File"
+          hdiutil create /tmp/tmp.dmg -ov -volname "Fruit_Economy-${{ env.RELEASE_VERSION }}.dmg" -fs HFS+ -srcfolder "dmg_dir/"
+          echo "=> Move Old DMG Version"
+          mv Fruit_Economy-${{ env.RELEASE_VERSION }}.dmg Fruit_Economy-${{ env.RELEASE_VERSION }}.old.dmg
+          echo "=> Convert Writable DMG File to Readonly DMG File"
+          hdiutil convert /tmp/tmp.dmg -format UDZO -o Fruit_Economy-${{ env.RELEASE_VERSION }}.dmg
+
+          echo "=> Create DMG"
+          jpackage --verbose --name "Fruit Economy" --app-version ${{ steps.app_version.outputs.app_version_arg }} --type dmg --app-image Fruit\ Economy.app
+          echo "=> Rename DMG"
+          mv Fruit\ Economy-1.0.dmg Fruit_Economy-${{ env.RELEASE_VERSION }}.dmg
+
+          echo "=> Create a Zip"
+          ditto -ck --sequesterRsrc --keepParent Fruit\ Economy.app Fruit_Economy-${{ env.RELEASE_VERSION }}.zip
+          echo "=> Sign the Zip"
+          /usr/bin/codesign --force --timestamp -s $MACOS_IDENTITY --entitlements build/entitlement.plist Fruit_Economy-${{ env.RELEASE_VERSION }}.zip
+          echo "=> Send Zip to be Notarised"
+          NOTARY_RESPONSE=$(/usr/bin/xcrun altool -t osx -f Fruit_Economy-${{ env.RELEASE_VERSION }}.zip --primary-bundle-id $PRIMARY_BUNDLE_ID --notarize-app --username $NOTARY_USERNAME --password $NOTARY_PASSWORD)
+
+          echo "=> Sign the DMG"
+          /usr/bin/codesign --force --timestamp -s $MACOS_IDENTITY --entitlements build/entitlement.plist Fruit_Economy-${{ env.RELEASE_VERSION }}.dmg
+          echo "=> Send DMG to be Notarised"
+          NOTARY_RESPONSE=$(/usr/bin/xcrun altool -t osx -f Fruit_Economy-${{ env.RELEASE_VERSION }}.dmg --primary-bundle-id $PRIMARY_BUNDLE_ID --notarize-app --username $NOTARY_USERNAME --password $NOTARY_PASSWORD)
+          echo $NOTARY_RESPONSE
+          echo "=> Extract Notary Token from Response"
+          NOTARY_TOKEN=$(echo $NOTARY_RESPONSE | egrep '[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{8,12}' -o)
+          echo $NOTARY_TOKEN
+          echo "=> Checking Notarised Progress"
+          n=0
+          until [ "$n" -ge 15 ]
+          do
+            echo "==> $n: Asking Apple if it's Notarised"
+            NOTARY_CHECK_OUTPUT=$(/usr/bin/xcrun altool --notarization-info "$NOTARY_TOKEN" --username $NOTARY_USERNAME --password $NOTARY_PASSWORD --output=json)
+            NOTARY_CHECK_OUTPUT_STATUS=$(jq -n --argjson data "$NOTARY_CHECK_OUTPUT" '$data."notarization-info"."Status"')
+            [[ $NOTARY_CHECK_OUTPUT_STATUS == '"in progress"' ]] && echo "==> Apple is still deciding" || break
+            n=$((n+1))
+            sleep 60
+          done
+          echo "=> Apple has made a decision"
+          jq -n --argjson data "$NOTARY_CHECK_OUTPUT" '$data'
+          [[ $NOTARY_CHECK_OUTPUT_STATUS == '"invalid"' ]] && echo "=> Apple says it's invalid" && exit 1 || echo "=> Apple says it's valid"
+          echo "=> We're valid 🎉. Let's get a ✔️ to make it official."
+          /usr/bin/xcrun stapler staple Fruit_Economy-${{ env.RELEASE_VERSION }}.dmg
+#          echo "=> Final checks on the App and DMG"
+#          /usr/bin/spctl -vvv --assess --type exec Fruit\ Economy.app
+#          /usr/bin/codesign -vvv --deep --strict Fruit_Economy-${{ env.RELEASE_VERSION }}.dmg
+#          /usr/bin/codesign -dvv Fruit_Economy-${{ env.RELEASE_VERSION }}.dmg
+
+      - name: upload artifacts on linux
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: fruit-economy_${{ env.RELEASE_VERSION }}_amd64.deb
+          path: fruit-economy_${{ env.RELEASE_VERSION }}_amd64.deb
+
+      - name: upload artifacts on macos
+        if: ${{ matrix.os == 'macos-latest' }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: Fruit_Economy-${{ env.RELEASE_VERSION }}.dmg
+          path: Fruit_Economy-${{ env.RELEASE_VERSION }}.dmg
+
+      - name: upload artifacts on windows
+        if: ${{ matrix.os == 'windows-latest' }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: Fruit_Economy-${{ env.RELEASE_VERSION }}.zip
+          path: Fruit_Economy-${{ env.RELEASE_VERSION }}.zip
+
+      - name: release artifacts on linux
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            fruit-economy_${{ env.RELEASE_VERSION }}_amd64.deb
+
+      - name: release artifacts on macos
+        if: ${{ matrix.os == 'macos-latest' }}
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            Fruit_Economy-${{ env.RELEASE_VERSION }}.dmg
+
+      - name: release artifacts on windows
+        if: ${{ matrix.os == 'windows-latest' }}
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            Fruit_Economy-${{ env.RELEASE_VERSION }}.zip
+      - name: Setup upterm session
+        uses: lhotari/action-upterm@v1
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: create version number for app
+        shell: bash
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/v}" >> $GITHUB_ENV
+
+      - name: download linux artifacts from build
+        uses: actions/download-artifact@v2
+        with:
+          name: fruit-economy_${{ env.RELEASE_VERSION }}_amd64.deb
+
+      - name: download macos artifacts from build
+        uses: actions/download-artifact@v2
+        with:
+          name: Fruit_Economy-${{ env.RELEASE_VERSION }}.dmg
+
+      - name: download windows artifacts from build
+        uses: actions/download-artifact@v2
+        with:
+          name: Fruit_Economy-${{ env.RELEASE_VERSION }}.zip
+
+      - name: Display structure of downloaded files
+        run: ls -R
+
+      - name: release artifacts for itch.io on linux
+        uses: robpc/itchio-upload-action@v1
+        with:
+          path: fruit-economy_${{ env.RELEASE_VERSION }}_amd64.deb
+          project: ${{ secrets.BUTLER_USERNAME }}/fruit-economy-7drl-2022
+          channel: linux
+          version: ${{ env.RELEASE_VERSION }}
+          api-key: ${{ secrets.BUTLER_CREDENTIALS }}
+
+      - name: release artifacts for itch.io on macos
+        uses: robpc/itchio-upload-action@v1
+        with:
+          path: Fruit_Economy-${{ env.RELEASE_VERSION }}.dmg
+          project: ${{ secrets.BUTLER_USERNAME }}/fruit-economy-7drl-2022
+          channel: osx
+          version: ${{ env.RELEASE_VERSION }}
+          api-key: ${{ secrets.BUTLER_CREDENTIALS }}
+
+      - name: release artifacts for itch.io on windows
+        uses: robpc/itchio-upload-action@v1
+        with:
+          path: Fruit_Economy-${{ env.RELEASE_VERSION }}.zip
+          project: ${{ secrets.BUTLER_USERNAME }}/fruit-economy-7drl-2022
+          channel: windows
+          version: ${{ env.RELEASE_VERSION }}
+          api-key: ${{ secrets.BUTLER_CREDENTIALS }}
