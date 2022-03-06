@@ -222,6 +222,23 @@
             (ui/gap padding 0)
             (key "⌫" {:width (+ (* 2 25) padding), :code "Backspace"})))))))
 
+(def message-log
+  (ui/dynamic ctx [{:keys [font-small fill-light-gray fill-black]} ctx
+                   {:keys [word guesses]} @*state]
+    (ui/with-context {:colors (colours word guesses)}
+      (ui/column
+        (ui/gap 0 padding)
+        (ui/halign 0.5
+          (ui/label "[ Message Log ]" font-small fill-black))
+        (ui/gap 0 padding)
+        (ui/halign 0.5
+          (ui/halign 0.5
+            (ui/column
+              [:stretch 1
+               (ui/column
+                 (interpose (ui/gap padding 2)
+                   (map #(ui/label (str %) font-small fill-black) (repeat 5 "Test Message"))))])))))))
+
 (def ui
   (ui/on-key-down #(type (:hui.event.key/key %))
     (ui/padding padding padding
@@ -251,8 +268,7 @@
               (ui/halign 0.5 field)
               [:stretch 1 nil]
               (ui/gap 0 padding)
-              #_
-              (ui/halign 0.5 keyboard))))))))
+              (ui/halign 0.5 message-log))))))))
 
 (defn checkbox [*checked text]
   (ui/clickable
