@@ -365,8 +365,8 @@
 (defn make-window []
   (let [screen (last (hui/screens))
         scale  (:scale screen)
-        width  (* 600 scale)
-        height (* 400 scale)
+        width  (* 1200 scale)
+        height (* 800 scale)
         area   (:work-area screen)
         x      (:x area)
         y      (-> (:height area) (- height) (/ 2) (+ (:y area)))]
