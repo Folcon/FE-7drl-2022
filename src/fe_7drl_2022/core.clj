@@ -270,6 +270,11 @@
               (ui/gap 0 padding)
               (ui/halign 0.5 message-log))))))))
 
+(def ui-views
+  ;; exploiting the fact that as long as array-map doesn't grow, it keeps insertion order
+  (array-map
+    "Map" ui))
+
 (def *selected (atom (ffirst ui-views)))
 
 (defn checkbox [*checked text]
@@ -306,7 +311,7 @@
              (ui/vscrollbar
                (ui/vscroll
                  (ui/column
-                   (for [[name ui] (sort-by first {"Apple" 1 "Pear" 2 "Grape" 3})]
+                   (for [[name _ui] ui-views]
                      (ui/clickable
                        #(reset! *selected name)
                        (ui/dynamic ctx [selected? (= name @*selected)
@@ -320,7 +325,8 @@
             (ui/padding 10 10
               (checkbox *floating "On top")))
           [:stretch 1
-           ui])))))
+           (ui/dynamic _ [name @*selected]
+             (ui-views name))])))))
 
 (defn on-paint [window ^Canvas canvas]
   (.clear canvas (unchecked-int 0xFFF6F6F6))
