@@ -144,6 +144,7 @@
                         (ui/height 50
                           (ui/valign 0.5
                             (ui/label (unit-glyph tile x-idx y-idx) font-large fill-white)))))))))))
+        #_
         (when-not (won? state)
           (let [colors (colours word guesses)]
             (list
@@ -247,6 +248,7 @@
               (ui/halign 0.5 field)
               [:stretch 1 nil]
               (ui/gap 0 padding)
+              #_
               (ui/halign 0.5 keyboard))))))))
 
 (defn checkbox [*checked text]
