@@ -62,6 +62,9 @@
 
 (def *state (atom (empty-state)))
 
+(comment
+  (reset! *state (empty-state)))
+
 (defn won? [{:keys [word guesses]}]
   (= (last guesses) word))
 
@@ -287,7 +290,7 @@
              (ui/vscrollbar
                (ui/vscroll
                  (ui/column
-                   (for [[name ui] (sort-by first {"Apple" 1 "Pear" 2})]
+                   (for [[name ui] (sort-by first {"Apple" 1 "Pear" 2 "Grape" 3})]
                      (ui/clickable
                        #(reset! *selected name)
                        (ui/dynamic ctx [selected? (= name @*selected)
