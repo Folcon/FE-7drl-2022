@@ -270,6 +270,8 @@
               (ui/gap 0 padding)
               (ui/halign 0.5 message-log))))))))
 
+(def *selected (atom (ffirst ui-views)))
+
 (defn checkbox [*checked text]
   (ui/clickable
     #(swap! *checked not)
@@ -288,8 +290,6 @@
               (ui/gap leading leading)))
           (ui/gap 5 0)
           (ui/label text font-ui fill-text))))))
-
-(def *selected (atom nil))
 
 (def app
   (ui/dynamic ctx [scale (:scale ctx)]
