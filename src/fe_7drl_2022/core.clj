@@ -57,7 +57,8 @@
 (defn empty-state []
   {:word    (rand-nth solutions)
    :guesses (rand-tile-seqs 10)
-   :typing  ""})
+   :typing  ""
+   :units (into {} (map (juxt (juxt :x :y) identity)) (repeatedly 10 #(hash-map :x (inc (rand-int 15)) :y (inc (rand-int 10)) :glyph (rand-nth (vals units)))))})
 
 (def *state (atom (empty-state)))
 
@@ -126,22 +127,23 @@
 
 (def field
   (ui/dynamic ctx [{:keys [font-large stroke-light-gray stroke-dark-gray fill-green fill-yellow fill-dark-gray fill-white fill-black]} ctx
-                   {:keys [word guesses typing] :as state} @*state]
-    (let [fill (fn [tile _idx]
+                   {:keys [word guesses units typing] :as state} @*state]
+    (let [fill (fn [tile]
                  (paint/fill (render-tile-colour tile)))
+          unit-glyph (fn [_tile x y] (get-in units [[x y] :glyph] " "))
           terrain guesses]
       (ui/column
         (interpose (ui/gap 0 padding)
-          (for [tile-row terrain]
+          (for [[tile-row y-idx] (map vector terrain (range))]
             (ui/row
               (interpose (ui/gap padding 0)
-                (for [[tile idx] (map vector tile-row (range))]
-                  (ui/fill (fill tile idx)
+                (for [[tile x-idx] (map vector tile-row (range))]
+                  (ui/fill (fill tile)
                     (ui/width 50
                       (ui/halign 0.5
                         (ui/height 50
                           (ui/valign 0.5
-                            (ui/label (str tile) font-large fill-white)))))))))))
+                            (ui/label (unit-glyph tile x-idx y-idx) font-large fill-white)))))))))))
         (when-not (won? state)
           (let [colors (colours word guesses)]
             (list
