@@ -48,7 +48,7 @@
    :fruit-9 "🍎" :fruit-10 "🍏" :fruit-11 "🍐" :fruit-12 "🍑" :fruit-13 "🍒" :fruit-14 "🍓" :fruit-15 "🥝" :fruit-16 "🍅"
    :rabbit "🐇" :deer "🦌" :dragon "🐉" :spider "🕷️"})
 
-(defn rand-units [] (vec (take 5 (shuffle (vals units)))))
+(defn rand-units [] (vec (take 15 (shuffle (vals units)))))
 
 (defn rand-unit-seqs [n] (vec (repeatedly n rand-units)))
 
