@@ -79,7 +79,7 @@
 
 (defn colour [word letter idx]
   (cond
-    (= (str (nth word idx)) (str letter)) :green
+    (and (< idx 5) (= (str (nth word idx)) (str letter))) :green
     (str/includes? word (str letter)) :yellow
     :else :gray))
 
