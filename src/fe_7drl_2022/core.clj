@@ -39,6 +39,8 @@
 
 (def solutions ["APPLE"])
 
+(def tiles [:beach :desert :forest :grassland :jungle :mountain :snow-mountain :ocean :snow :tundra])
+
 (def units
   {:growing-plant "🌱" :dying-plant "🥀"
    :bush "🌳" :tree-1 "🌴" :tree-2 "🌲" :tree-3 "🌵" :tree-4 "🌾" :tree-5 "🎋" :tree-6 "🎍" :magic-tree "🎄"
@@ -48,13 +50,13 @@
    :fruit-9 "🍎" :fruit-10 "🍏" :fruit-11 "🍐" :fruit-12 "🍑" :fruit-13 "🍒" :fruit-14 "🍓" :fruit-15 "🥝" :fruit-16 "🍅"
    :rabbit "🐇" :deer "🦌" :dragon "🐉" :spider "🕷️"})
 
-(defn rand-units [] (vec (take 15 (shuffle (vals units)))))
+(defn rand-tiles [] (vec (take 15 (shuffle tiles))))
 
-(defn rand-unit-seqs [n] (vec (repeatedly n rand-units)))
+(defn rand-tile-seqs [n] (vec (repeatedly n rand-tiles)))
 
 (defn empty-state []
   {:word    (rand-nth solutions)
-   :guesses (rand-unit-seqs 10)
+   :guesses (rand-tile-seqs 10)
    :typing  ""})
 
 (def *state (atom (empty-state)))
