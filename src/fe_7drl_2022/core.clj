@@ -275,7 +275,7 @@
   (array-map
     "Map" map-ui-view))
 
-(def *selected (atom (ffirst ui-views)))
+(def *selected-ui-view (atom (ffirst ui-views)))
 
 (defn checkbox [*checked text]
   (ui/clickable
@@ -313,8 +313,8 @@
                  (ui/column
                    (for [[name _ui] ui-views]
                      (ui/clickable
-                       #(reset! *selected name)
-                       (ui/dynamic ctx [selected? (= name @*selected)
+                       #(reset! *selected-ui-view name)
+                       (ui/dynamic ctx [selected? (= name @*selected-ui-view)
                                         hovered?  (:hui/hovered? ctx)]
                          (let [label (ui/padding 20 leading
                                        (ui/label name font-ui fill-text))]
@@ -325,7 +325,7 @@
             (ui/padding 10 10
               (checkbox *floating "On top")))
           [:stretch 1
-           (ui/dynamic _ [name @*selected]
+           (ui/dynamic _ [name @*selected-ui-view]
              (ui-views name))])))))
 
 (defn on-paint [window ^Canvas canvas]
