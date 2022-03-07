@@ -83,7 +83,9 @@
 (defn won? [{:keys [word guesses]}]
   (= (last guesses) word))
 
-(defn type [code]
+(defn on-key-press [code]
+  (println :code (pr-str code))
+  #_
   (let [{:keys [typing] :as state} @*state
         typed (count typing)]
     (when-not (won? @*state)
@@ -197,7 +199,7 @@
   ([char] (key char {:width 25 :code char}))
   ([char {:keys [width code]}]
    (ui/clickable
-     #(type code)
+     #(on-key-press code)
      (ui/dynamic ctx [{:keys [font-small fill-green fill-yellow fill-dark-gray fill-light-gray fill-black fill-white]} ctx
                       color (get (:colors ctx) char)]
        (ui/fill
@@ -340,7 +342,7 @@
                  (map #(ui/halign 0.5 (ui/label (str %) font-small fill-black)) message-log)))]))))))
 
 (def map-ui-view
-  (ui/on-key-down #(type (:hui.event.key/key %))
+  (ui/on-key-down #(on-key-press (:hui.event.key/key %))
     (ui/padding padding padding
       (ui/dynamic ctx [{:keys [scale face-ui]} ctx]
         (let [font-small (Font. ^Typeface typeface (float (* scale 13)))
@@ -378,7 +380,7 @@
               (ui/halign 0.5 message-log))))))))
 
 (def quest-ui-view
-  (ui/on-key-down #(type (:hui.event.key/key %))
+  (ui/on-key-down #(on-key-press (:hui.event.key/key %))
     (ui/padding padding padding
       (ui/dynamic ctx [{:keys [scale face-ui]} ctx]
         (let [font-small (Font. ^Typeface typeface (float (* scale 13)))
@@ -416,7 +418,7 @@
               (ui/halign 0.5 message-log))))))))
 
 (def peep-ui-view
-  (ui/on-key-down #(type (:hui.event.key/key %))
+  (ui/on-key-down #(on-key-press (:hui.event.key/key %))
     (ui/padding padding padding
       (ui/dynamic ctx [{:keys [scale face-ui]} ctx
                        peeps (:peeps @*state)]
