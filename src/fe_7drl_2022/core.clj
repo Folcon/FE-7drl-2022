@@ -303,8 +303,9 @@
                 (ui/dynamic ctx [_ (:selected-quest @*state)]
                   (ui/row
                     (interpose (ui/gap 2 padding)
-                      (for [[name _quest] (:quests @*state)]
-                        (quest-ui-btn name {:width 100 :code name :selected-quest (:selected-quest @*state)}))))))
+                      (for [[name _quest] (:quests @*state)
+                            :let [label-width (+ (* (count name) 8) padding)]]
+                        (quest-ui-btn name {:width label-width :code name :selected-quest (:selected-quest @*state)}))))))
               (ui/gap 0 padding)
               [:stretch 1 nil]
               (ui/halign 0.5 field)
@@ -340,8 +341,9 @@
                 (ui/dynamic ctx [_ (:selected-quest @*state)]
                   (ui/row
                     (interpose (ui/gap 2 padding)
-                      (for [[name _quest] (:quests @*state)]
-                        (quest-ui-btn name {:width 100 :code name :selected-quest (:selected-quest @*state)}))))))
+                      (for [[name _quest] (:quests @*state)
+                            :let [label-width (+ (* (count name) 8) padding)]]
+                        (quest-ui-btn name {:width label-width :code name :selected-quest (:selected-quest @*state)}))))))
               (ui/gap 0 padding)
               [:stretch 1 nil]
               (ui/halign 0.5 quest-detail-ui)
