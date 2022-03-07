@@ -459,13 +459,40 @@
                               (checkbox [:peeps name :peep/selected]
                                 (show-map-ui peep font-small fill-black)))))))))))))))))
 
+(def messages-ui-view
+  (ui/on-key-down #(on-key-press (:hui.event.key/key %))
+    (ui/padding padding padding
+      (ui/dynamic ctx [{:keys [scale face-ui]} ctx
+                       peeps (:peeps @*state)]
+        (let [font-small (Font. ^Typeface typeface (float (* scale 13)))
+              fill-black (paint/fill 0xFF000000)
+              fill-yellow (paint/fill 0xFFC9B457)
+              fill-light-gray (paint/fill 0xFFD4D6DA)]
+          (ui/with-context
+            {:font-large      (Font. ^Typeface typeface (float (* scale 26)))
+             :font-small      font-small
+             :fill-white      (paint/fill 0xFFFFFFFF)
+             :fill-black      fill-black
+             :fill-light-gray fill-light-gray
+             :fill-dark-gray  (paint/fill 0xFF777C7E)
+             :fill-green      (paint/fill 0xFF6AAA64)
+             :fill-yellow     fill-yellow
+             :stroke-light-gray (paint/stroke 0xFFD4D6DA (* 2 scale))
+             :stroke-dark-gray  (paint/stroke 0xFF777C7E (* 2 scale))}
+            (ui/column
+              [:stretch 1
+               (ui/vscrollbar
+                 (ui/vscroll
+                   (ui/column
+                     message-log)))])))))))
 
 (def ui-views
   ;; exploiting the fact that as long as array-map doesn't grow, it keeps insertion order
   (array-map
     "Map" map-ui-view
     "Quest" quest-ui-view
-    "Peep" peep-ui-view))
+    "Peep" peep-ui-view
+    "Messages" messages-ui-view))
 
 (def *selected-ui-view (atom (ffirst ui-views)))
 
