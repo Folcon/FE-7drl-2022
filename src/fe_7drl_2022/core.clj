@@ -59,9 +59,11 @@
    :guesses (rand-tile-seqs 10)
    :typing  ""
    :units (into {} (map (juxt (juxt :x :y) identity)) (repeatedly 10 #(hash-map :x (inc (rand-int 15)) :y (inc (rand-int 10)) :glyph (rand-nth (vals units)))))
-   :quests (into (sorted-map) {"A Quest!" {:quest/name "A Quest!"}
-                               "Another Quest!" {:quest/name "Another Quest!"}})
-   :selected-quest "A Quest!"
+   :quests (into (sorted-map) {"Goblins Attack Farm!" {:quest/name "Goblins Attack Farm!" :quest/mobs [{:mob/name "Goblin" :combat/dice "2d4"} {:mob/name "Goblin" :combat/dice "2d4"} {:mob/name "Goblin" :combat/dice "2d4"}]}
+                               "Cull Local Rats!" {:quest/name "Cull Local Rats!" :quest/mobs [{:mob/name "Rat" :combat/dice "1d4"} {:mob/name "Rat" :combat/dice "1d4"} {:mob/name "Rat" :combat/dice "1d4"}]}})
+   :selected-quest "Cull Local Rats!"
+   :peeps (into (sorted-map) {"peep 1" {:peep/name "peep 1" :peep/class :mage :peep/selected false :combat/dice "2d4"}
+                              "peep 2" {:peep/name "peep 2" :peep/class :fighter :peep/selected false :combat/dice "2d4"}})
    :message-log ["Welcome to Fruit Economy!" "Have fun!"]})
 
 (def *state (atom (empty-state)))
