@@ -325,20 +325,19 @@
 
 (def message-log
   (ui/dynamic ctx [{:keys [font-small fill-light-gray fill-black]} ctx
-                   {:keys [word guesses message-log]} @*state]
-    (ui/with-context {:colors (colours word guesses)}
-      (ui/column
-        (ui/gap 0 padding)
+                   {:keys [message-log]} @*state]
+    (ui/column
+      (ui/gap 0 padding)
+      (ui/halign 0.5
+        (ui/label "[ Message Log ]" font-small fill-black))
+      (ui/gap 0 padding)
+      (ui/halign 0.5
         (ui/halign 0.5
-          (ui/label "[ Message Log ]" font-small fill-black))
-        (ui/gap 0 padding)
-        (ui/halign 0.5
-          (ui/halign 0.5
-            (ui/column
-              [:stretch 1
-               (ui/column
-                 (interpose (ui/gap 2 padding)
-                   (map #(ui/halign 0.5 (ui/label (str %) font-small fill-black)) message-log)))])))))))
+          (ui/column
+            [:stretch 1
+             (ui/column
+               (interpose (ui/gap 2 padding)
+                 (map #(ui/halign 0.5 (ui/label (str %) font-small fill-black)) message-log)))]))))))
 
 (def map-ui-view
   (ui/on-key-down #(type (:hui.event.key/key %))
