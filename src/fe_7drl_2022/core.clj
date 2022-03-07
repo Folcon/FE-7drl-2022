@@ -50,6 +50,20 @@
 
 (defn rand-tile-seqs [n] (vec (repeatedly n rand-tiles)))
 
+(defn str->int [n]
+  (Integer/parseInt n))
+
+(defn basic-roll [n d]
+  (repeatedly n #(inc (rand-int d))))
+
+(defn roll
+  "Takes dice of the form :2d6"
+  [dice]
+  (let [dice (if (keyword? dice) (name dice) dice)
+        [_ n d] (re-matches #"(\d+)d(\d+)" dice)
+        [n d] [(str->int n) (str->int d)]]
+    (basic-roll n d)))
+
 (defn selected-peeps [peeps] (into [] (comp (map second) (filter :peep/selected)) peeps))
 
 (defn combat [{:keys [quests selected-quest peeps] :as state}]
