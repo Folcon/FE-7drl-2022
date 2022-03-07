@@ -263,20 +263,20 @@
 
 (def quest-detail-ui
   (ui/dynamic ctx [{:keys [font-large font-small stroke-light-gray stroke-dark-gray fill-green fill-yellow fill-dark-gray fill-white fill-black]} ctx
-                   {:keys [quests selected-quest characters] :as state} @*state]
+                   {:keys [quests selected-quest peeps] :as state} @*state]
     (ui/column
       (show-map-ui (get quests selected-quest) font-large fill-black)
       (ui/gap 0 padding)
       (ui/halign 0.5
         (ui/row
           (interpose (ui/gap padding 2)
-            (for [[_name character] characters]
+            (for [[_name peep] peeps]
               (ui/fill fill-yellow
                 (ui/padding 10
-                  (let [{:character/keys [name]} character]
+                  (let [{:peep/keys [name]} peep]
                     (ui/column
-                      (checkbox [:characters name :character/selected]
-                        (show-map-ui character font-small fill-black))))))))))
+                      (checkbox [:peeps name :peep/selected]
+                        (show-map-ui peep font-small fill-black))))))))))
       (ui/gap 0 padding)
       (ui/halign 0.5
         (ui/fill fill-green
@@ -404,11 +404,11 @@
               (ui/gap 0 padding)
               (ui/halign 0.5 message-log))))))))
 
-(def character-ui-view
+(def peep-ui-view
   (ui/on-key-down #(type (:hui.event.key/key %))
     (ui/padding padding padding
       (ui/dynamic ctx [{:keys [scale face-ui]} ctx
-                       characters (:characters @*state)]
+                       peeps (:peeps @*state)]
         (let [font-small (Font. ^Typeface typeface (float (* scale 13)))
               fill-black (paint/fill 0xFF000000)
               fill-yellow (paint/fill 0xFFC9B457)
@@ -428,13 +428,13 @@
               (ui/halign 0.5
                 (ui/row
                   (interpose (ui/gap padding 2)
-                    (for [[_name character] characters]
+                    (for [[_name peep] peeps]
                       (ui/fill fill-yellow
                         (ui/padding 10
-                          (let [{:character/keys [name]} character]
+                          (let [{:peep/keys [name]} peep]
                             (ui/column
-                              (checkbox [:characters name :character/selected]
-                                (show-map-ui character font-small fill-black)))))))))))))))))
+                              (checkbox [:peeps name :peep/selected]
+                                (show-map-ui peep font-small fill-black)))))))))))))))))
 
 
 (def ui-views
@@ -442,7 +442,7 @@
   (array-map
     "Map" map-ui-view
     "Quest" quest-ui-view
-    "Character" character-ui-view))
+    "Peep" peep-ui-view))
 
 (def *selected-ui-view (atom (ffirst ui-views)))
 
