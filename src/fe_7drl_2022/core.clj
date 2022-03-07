@@ -405,7 +405,7 @@
         (ui/halign 0.5
           (ui/fill (if selected-peeps? fill-green fill-dark-gray)
             (ui/clickable
-              (if selected-peeps? #(swap! *state process-quest) identity)
+              #(when selected-peeps? (swap! *state process-quest))
               (ui/padding 10 10
                 (ui/label "⇫ Begin" font-small fill-white)))))))))
 
