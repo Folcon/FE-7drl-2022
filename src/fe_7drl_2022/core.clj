@@ -382,7 +382,7 @@
 
 (def *selected-ui-view (atom (ffirst ui-views)))
 
-(defn checkbox [*checked text]
+(defn atom-checkbox [*checked text]
   (ui/clickable
     #(swap! *checked not)
     (ui/dynamic ctx [checked @*checked
@@ -428,7 +428,7 @@
                              hovered?  (ui/fill (doto (Paint.) (.setColor (unchecked-int 0xFFE1EFFA))) label)
                              :else     label))))))))]
             (ui/padding 10 10
-              (checkbox *floating "On top")))
+              (atom-checkbox *floating "On top")))
           [:stretch 1
            (ui/dynamic _ [name @*selected-ui-view]
              (ui-views name))])))))
