@@ -335,21 +335,25 @@
             (ui/gap padding 0)
             (key "⌫" {:width (+ (* 2 25) padding), :code "Backspace"})))))))
 
-(def message-log
-  (ui/dynamic ctx [{:keys [font-small fill-light-gray fill-black]} ctx
-                   {:keys [message-log]} @*state]
-    (ui/column
-      (ui/gap 0 padding)
-      (ui/halign 0.5
-        (ui/label "[ Message Log ]" font-small fill-black))
-      (ui/gap 0 padding)
-      (ui/halign 0.5
-        (ui/halign 0.5
-          (ui/column
-            [:stretch 1
+(defn message-log
+  ([] (message-log nil))
+  ([limit]
+   (ui/dynamic ctx [{:keys [font-small fill-light-gray fill-black]} ctx
+                    {:keys [message-log]} @*state]
+     (let [size (count message-log)
+           message-log' (if (and limit (> size limit)) (subvec message-log (- size limit)) message-log)]
+       (ui/column
+         (ui/gap 0 padding)
+         (ui/halign 0.5
+           (ui/label "[ Message Log ]" font-small fill-black))
+         (ui/gap 0 padding)
+         (ui/halign 0.5
+           (ui/halign 0.5
              (ui/column
-               (interpose (ui/gap 2 padding)
-                 (map #(ui/halign 0.5 (ui/label (str %) font-small fill-black)) message-log)))]))))))
+               [:stretch 1
+                (ui/column
+                  (interpose (ui/gap 2 padding)
+                    (map #(ui/halign 0.5 (ui/label (str %) font-small fill-black)) message-log')))]))))))))
 
 (def map-ui-view
   (ui/on-key-down #(on-key-press (:hui.event.key/key %))
@@ -387,7 +391,7 @@
               (ui/halign 0.5 field)
               [:stretch 1 nil]
               (ui/gap 0 padding)
-              (ui/halign 0.5 message-log))))))))
+              (ui/halign 0.5 (message-log 10)))))))))
 
 (def quest-ui-view
   (ui/on-key-down #(on-key-press (:hui.event.key/key %))
@@ -425,7 +429,7 @@
               (ui/halign 0.5 quest-detail-ui)
               [:stretch 1 nil]
               (ui/gap 0 padding)
-              (ui/halign 0.5 message-log))))))))
+              (ui/halign 0.5 (message-log 10)))))))))
 
 (def peep-ui-view
   (ui/on-key-down #(on-key-press (:hui.event.key/key %))
@@ -484,7 +488,7 @@
                (ui/vscrollbar
                  (ui/vscroll
                    (ui/column
-                     message-log)))])))))))
+                     (message-log))))])))))))
 
 (def ui-views
   ;; exploiting the fact that as long as array-map doesn't grow, it keeps insertion order
