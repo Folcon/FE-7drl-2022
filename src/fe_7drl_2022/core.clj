@@ -163,10 +163,10 @@
   {:peep/name name :peep/class class :combat/hit "2d4" :combat/dmg "2d4" :combat/def 4 :combat/hp 5 :combat/max-hp 5})
 
 (defn make-rat [name]
-  {:mob/name name :combat/hit "1d4" :combat/dmg "2d4" :combat/def 4 :combat/hp 2 :combat/max-hp 2})
+  {:mob/name name :combat/hit "1d6" :combat/dmg "2d4" :combat/def 4 :combat/hp 2 :combat/max-hp 2})
 
 (defn make-goblin [name]
-  {:mob/name name :combat/hit "1d4" :combat/dmg "2d4" :combat/def 4 :combat/hp 4 :combat/max-hp 4})
+  {:mob/name name :combat/hit "1d6" :combat/dmg "2d4" :combat/def 4 :combat/hp 4 :combat/max-hp 4})
 
 (defn empty-state []
   {:player-hp 20
