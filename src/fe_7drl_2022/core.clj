@@ -61,7 +61,8 @@
    :units (into {} (map (juxt (juxt :x :y) identity)) (repeatedly 10 #(hash-map :x (inc (rand-int 15)) :y (inc (rand-int 10)) :glyph (rand-nth (vals units)))))
    :quests (into (sorted-map) {"A Quest!" {:quest/name "A Quest!"}
                                "Another Quest!" {:quest/name "Another Quest!"}})
-   :selected-quest "A Quest!"})
+   :selected-quest "A Quest!"
+   :message-log ["Welcome to Fruit Economy!" "Have fun!"]})
 
 (def *state (atom (empty-state)))
 
@@ -312,7 +313,7 @@
 
 (def message-log
   (ui/dynamic ctx [{:keys [font-small fill-light-gray fill-black]} ctx
-                   {:keys [word guesses]} @*state]
+                   {:keys [word guesses message-log]} @*state]
     (ui/with-context {:colors (colours word guesses)}
       (ui/column
         (ui/gap 0 padding)
@@ -324,8 +325,8 @@
             (ui/column
               [:stretch 1
                (ui/column
-                 (interpose (ui/gap padding 2)
-                   (map #(ui/label (str %) font-small fill-black) (repeat 5 "Test Message"))))])))))))
+                 (interpose (ui/gap 2 padding)
+                   (map #(ui/halign 0.5 (ui/label (str %) font-small fill-black)) message-log)))])))))))
 
 (def map-ui-view
   (ui/on-key-down #(type (:hui.event.key/key %))
