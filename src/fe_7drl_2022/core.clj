@@ -59,16 +59,25 @@
         _ (println :peeps (pr-str peeps))]
     state))
 
+(defn make-peep [[name class]]
+  {:peep/name name :peep/class class :combat/hit "2d4" :combat/dmg "2d4" :combat/def 4 :combat/hp 5 :combat/max-hp 5})
+
+(defn make-rat [name]
+  {:mob/name name :combat/hit "1d4" :combat/dmg "2d4" :combat/def 4 :combat/hp 2 :combat/max-hp 2})
+
+(defn make-goblin [name]
+  {:mob/name name :combat/hit "1d4" :combat/dmg "2d4" :combat/def 4 :combat/hp 4 :combat/max-hp 4})
+
 (defn empty-state []
   {:player-hp 20
    :terrain (rand-tile-seqs 10)
    :typing  ""
    :units (into {} (map (juxt (juxt :x :y) identity)) (repeatedly 10 #(hash-map :x (inc (rand-int 15)) :y (inc (rand-int 10)) :glyph (rand-nth (vals units)))))
-   :quests (into (sorted-map) {"Goblins Attack Farm!" {:quest/name "Goblins Attack Farm!" :quest/mobs [{:mob/name "Goblin" :combat/dice "2d4"} {:mob/name "Goblin" :combat/dice "2d4"} {:mob/name "Goblin" :combat/dice "2d4"}]}
-                               "Cull Local Rats!" {:quest/name "Cull Local Rats!" :quest/mobs [{:mob/name "Rat" :combat/dice "1d4"} {:mob/name "Rat" :combat/dice "1d4"} {:mob/name "Rat" :combat/dice "1d4"}]}})
+   :quests (into (sorted-map) {"Goblins Attack Farm!" {:quest/name "Goblins Attack Farm!" :quest/mobs [(mapv make-goblin ["Goblin 1" "Goblin 2" "Goblin 3"])]}
+                               "Cull Local Rats!" {:quest/name "Cull Local Rats!" :quest/mobs [(mapv make-rat ["Rat 1"]) (mapv make-rat ["Rat 1" "Rat 2" "Rat 3"])]}})
    :selected-quest "Cull Local Rats!"
-   :peeps (into (sorted-map) {"peep 1" {:peep/name "peep 1" :peep/class :mage :peep/selected false :combat/dice "2d4"}
-                              "peep 2" {:peep/name "peep 2" :peep/class :fighter :peep/selected false :combat/dice "2d4"}})
+   ;:peep/selected false
+   :peeps (into (sorted-map) (into {} (map (juxt first make-peep)) [["Peep 1" :mage] ["Peep 2" :fighter]]))
    :message-log ["Welcome to Fruit Economy!" "Have fun!"]})
 
 (def *state (atom (empty-state)))
