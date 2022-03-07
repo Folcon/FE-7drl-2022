@@ -66,6 +66,12 @@
 
 (defn selected-peeps [peeps] (into [] (comp (map second) (filter :peep/selected)) peeps))
 
+(defn peep? [entity]
+  (contains? entity :peep/name))
+
+(defn mob? [entity]
+  (contains? entity :mob/name))
+
 (defn combat [{:keys [quests selected-quest peeps] :as state}]
   (let [quest (get quests selected-quest)
         peeps (selected-peeps peeps)
