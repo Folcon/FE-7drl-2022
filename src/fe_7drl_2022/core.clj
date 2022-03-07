@@ -222,10 +222,9 @@
         (reset! *selected-ui-view "Quest")
         (swap! *state assoc :selected-quest quest-name))
      (ui/dynamic ctx [{:keys [font-small fill-green fill-yellow fill-dark-gray fill-light-gray fill-black fill-white]} ctx
-                      color (get (:colors ctx) quest-name)
-                      color (if (= selected-quest quest-name) :green color)]
+                      colour (when (= selected-quest quest-name) :green)]
        (ui/fill
-         (case color
+         (case colour
            :green  fill-green
            :yellow fill-yellow
            :gray   fill-dark-gray
@@ -234,7 +233,7 @@
            (ui/halign 0.5
              (ui/height 35
                (ui/valign 0.5
-                 (ui/label quest-name font-small (if (some? color) fill-white fill-black)))))))))))
+                 (ui/label quest-name font-small (if (some? colour) fill-white fill-black)))))))))))
 
 (defn checkbox [checked-path child]
   (ui/clickable
