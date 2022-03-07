@@ -253,21 +253,26 @@
           (ui/gap 5 0)
           child)))))
 
-(defn show-val-ui [v font fill]
+(declare show-map-ui)
+
+(defn show-val-ui [v font fill lead-col?]
   (cond
-    (instance? clojure.lang.Atom v) (show-val-ui @v font fill)
-    (vector? v) (ui/column (interpose (ui/gap 2 padding) (mapv #(show-val-ui % font fill) v)))
-    (map? v) (ui/label (pr-str v) font fill)
+    (instance? clojure.lang.Atom v) (show-val-ui @v font fill lead-col?)
+    (vector? v) ((if lead-col? ui/column ui/row)
+                 (interpose (ui/gap 2 padding) (mapv #(show-val-ui % font fill lead-col?) v)))
+    (map? v) (show-map-ui v font fill (not lead-col?))
     :else (ui/label (pr-str v) font fill)))
 
-(defn show-map-ui [m font fill]
-  (ui/column
+(defn show-map-ui
+  ([m font fill] (show-map-ui m font fill true))
+  ([m font fill lead-col?]
+   ((if lead-col? ui/column ui/row)
     (for [[k v] m]
       (ui/padding 5
-        (ui/row
-          (ui/label (str k) font fill)
-          (ui/gap 10 0)
-          (show-val-ui v font fill))))))
+        ((if lead-col? ui/row ui/column)
+         (ui/label (str k) font fill)
+         (ui/gap 10 0)
+         (show-val-ui v font fill lead-col?)))))))
 
 (def quest-detail-ui
   (ui/dynamic ctx [{:keys [font-large font-small stroke-light-gray stroke-dark-gray fill-green fill-yellow fill-dark-gray fill-white fill-black]} ctx
