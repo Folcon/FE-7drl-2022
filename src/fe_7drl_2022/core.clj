@@ -192,6 +192,7 @@
                       (ui/fill stroke-light-gray
                         (ui/gap 50 50)))))))))))))
 
+#_
 (defn key
   ([char] (key char {:width 25 :code char}))
   ([char {:keys [width code]}]
@@ -296,6 +297,7 @@
                 (ui/label "⇫ Begin" font-small fill-white)))))))))
 
 
+#_
 (def keyboard
   (ui/dynamic ctx [{:keys [font-small fill-light-gray fill-black]} ctx
                    {:keys [word guesses]} @*state]
