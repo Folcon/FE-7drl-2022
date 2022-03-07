@@ -72,12 +72,92 @@
 (defn mob? [entity]
   (contains? entity :mob/name))
 
-(defn combat [{:keys [quests selected-quest peeps] :as state}]
+(defn combat-round [state initiative]
+  (reduce
+    (fn [{:keys [combatants] :as state} entity]
+      (let [p? (peep? entity)
+            atker-name (get entity (if p? :peep/name :mob/name))
+
+            atker (get combatants atker-name)
+
+            [target-name target] (first (shuffle (filter (comp (if p? mob? peep?) second) combatants)))
+
+            ;; combat round
+            hit-roll (reduce + (roll (:combat/hit atker)))
+            target-def (:combat/def target)
+            hits? (> hit-roll target-def)
+            dmg-roll (reduce + (roll (:combat/dmg atker)))
+            target-hp (:combat/hp target)
+            rem-hp (- target-hp dmg-roll)]
+        (cond->
+          (update state :messages conj (str atker-name " attacks " target-name " and " (if hits? "hits" "misses") " (" hit-roll " vs " target-def ")" (when hits? (str " dealing " dmg-roll " dmg and " (if (> rem-hp 0) (str "leaving them on " rem-hp " hp") "killing them")))))
+          hits?
+          (assoc-in [:combatants target-name :combat/hp] rem-hp))))
+    state
+    initiative))
+
+(defn alive-on-each-side [combatants]
+  (frequencies (into [] (comp (map second) (remove #(>= 0 (:combat/hp %))) (map #(cond (peep? %) :peep (mob? %) :mob :else :other))) combatants)))
+
+(defn combat-encounter [peeps mobs]
+  (let [init-initiative (shuffle (into peeps mobs))
+        init-combat-state {:messages []
+                           :combatants (into {} (map (juxt #(or (:peep/name %) (:mob/name %)) identity)) init-initiative)}]
+    (println :init-initiative (pr-str init-initiative))
+    (loop [round 0
+           combat-state init-combat-state
+           initiative init-initiative]
+      (let [round-result (combat-round combat-state initiative)
+            alive (alive-on-each-side (:combatants round-result))]
+        (cond
+          (<= (count alive) 1)
+          (assoc round-result :alive alive)
+
+          (> round 25)
+          (-> round-result
+            (update :messages conj "And then everyone gave up because their arms were tired")
+            (assoc :alive alive))
+
+          :else
+          (recur (inc round) round-result initiative))))))
+
+(defn process-encounters [peeps encounters]
+  (reduce
+    (fn [[prior-messages peeps] mobs]
+      (let [{:keys [alive combatants messages] :as _encounter-result} (combat-encounter peeps mobs)
+            peeps' (reduce
+                     (fn [v {:peep/keys [name] :as peep}]
+                       (conj v (get combatants name peep)))
+                     []
+                     peeps)
+            messages' (into prior-messages messages)]
+        (if (contains? alive :peep)
+          [messages' peeps']
+          (reduced [messages' peeps']))))
+    [["Starting Adventure"] peeps]
+    encounters))
+
+(defn process-quest [{:keys [quests selected-quest peeps] :as state}]
   (let [quest (get quests selected-quest)
-        peeps (selected-peeps peeps)
+        chosen-peeps (selected-peeps peeps)
         _ (println :quest (pr-str quest))
-        _ (println :peeps (pr-str peeps))]
-    state))
+        _ (println :peeps (pr-str peeps))
+        _ (println :chosen-peeps (pr-str chosen-peeps))
+        {encounters :quest/mobs} quest
+        _ (println :encounters (pr-str (first encounters)))
+        [messages peeps'] (process-encounters chosen-peeps encounters)
+        _ (println :quest-log (pr-str messages))
+        names->peeps' (into {} (map (juxt :peep/name identity)) peeps')
+        _ (println :names->peeps' (pr-str names->peeps'))
+        peeps' (reduce-kv
+                 (fn [m peep-name peep]
+                   (assoc m peep-name (get names->peeps' peep-name peep)))
+                 {}
+                 peeps)
+        _ (println :peeps' (pr-str peeps'))]
+    (-> state
+      (update :message-log into messages)
+      (assoc :peeps peeps'))))
 
 (defn make-peep [[name class]]
   {:peep/name name :peep/class class :combat/hit "2d4" :combat/dmg "2d4" :combat/def 4 :combat/hp 5 :combat/max-hp 5})
@@ -324,7 +404,7 @@
         (ui/halign 0.5
           (ui/fill (if selected-peeps? fill-green fill-dark-gray)
             (ui/clickable
-              (if selected-peeps? #(swap! *state combat) identity)
+              (if selected-peeps? #(swap! *state process-quest) identity)
               (ui/padding 10 10
                 (ui/label "⇫ Begin" font-small fill-white)))))))))
 
