@@ -65,7 +65,7 @@
 
 (defn empty-state []
   {:word    (rand-nth solutions)
-   :guesses (rand-tile-seqs 10)
+   :terrain (rand-tile-seqs 10)
    :typing  ""
    :units (into {} (map (juxt (juxt :x :y) identity)) (repeatedly 10 #(hash-map :x (inc (rand-int 15)) :y (inc (rand-int 10)) :glyph (rand-nth (vals units)))))
    :quests (into (sorted-map) {"Goblins Attack Farm!" {:quest/name "Goblins Attack Farm!" :quest/mobs [{:mob/name "Goblin" :combat/dice "2d4"} {:mob/name "Goblin" :combat/dice "2d4"} {:mob/name "Goblin" :combat/dice "2d4"}]}
@@ -96,7 +96,7 @@
 
         (and (= 5 typed) (= "Enter" code))
         (if (contains? dictionary typing)
-          (swap! *state #(-> % (assoc :typing "") (update :guesses conj typing))))))))
+          (swap! *state #(-> % (assoc :typing "") (update :terrain conj typing))))))))
 
 (defn colour [word letter idx]
   (cond
@@ -145,11 +145,10 @@
 
 (def field
   (ui/dynamic ctx [{:keys [font-large stroke-light-gray stroke-dark-gray fill-green fill-yellow fill-dark-gray fill-white fill-black]} ctx
-                   {:keys [word guesses units typing] :as state} @*state]
+                   {:keys [terrain units] :as state} @*state]
     (let [fill (fn [tile]
                  (paint/fill (render-tile-colour tile)))
-          unit-glyph (fn [_tile x y] (get-in units [[x y] :glyph] " "))
-          terrain guesses]
+          unit-glyph (fn [_tile x y] (get-in units [[x y] :glyph] " "))]
       (ui/column
         (interpose (ui/gap 0 padding)
           (for [[tile-row y-idx] (map vector terrain (range))]
