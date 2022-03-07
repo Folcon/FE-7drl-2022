@@ -54,6 +54,15 @@
 
 (defn rand-tile-seqs [n] (vec (repeatedly n rand-tiles)))
 
+(defn selected-peeps [peeps] (into [] (comp (map second) (filter :peep/selected)) peeps))
+
+(defn combat [{:keys [quests selected-quest peeps] :as state}]
+  (let [quest (get quests selected-quest)
+        peeps (selected-peeps peeps)
+        _ (println :quest (pr-str quest))
+        _ (println :peeps (pr-str peeps))]
+    state))
+
 (defn empty-state []
   {:word    (rand-nth solutions)
    :guesses (rand-tile-seqs 10)
@@ -280,12 +289,13 @@
                       (checkbox [:peeps name :peep/selected]
                         (show-map-ui peep font-small fill-black))))))))))
       (ui/gap 0 padding)
-      (ui/halign 0.5
-        (ui/fill fill-green
-          (ui/clickable
-            #(reset! *state (empty-state))
-            (ui/padding 10 10
-              (ui/label "⇫ Begin" font-small fill-white))))))))
+      (let [selected-peeps? (seq (selected-peeps peeps))]
+        (ui/halign 0.5
+          (ui/fill (if selected-peeps? fill-green fill-dark-gray)
+            (ui/clickable
+              (if selected-peeps? #(swap! *state combat) identity)
+              (ui/padding 10 10
+                (ui/label "⇫ Begin" font-small fill-white)))))))))
 
 
 (def keyboard
