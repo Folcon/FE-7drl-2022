@@ -392,8 +392,9 @@
       (ui/halign 0.5
         (ui/row
           (interpose (ui/gap padding 2)
-            (for [[_name peep] peeps]
-              (ui/fill fill-yellow
+            (for [[_name peep] peeps
+                  :let [alive? (> (:combat/hp peep) 0)]]
+              (ui/fill (if alive? fill-yellow fill-dark-gray)
                 (ui/padding 10
                   (let [{:peep/keys [name]} peep]
                     (ui/column
