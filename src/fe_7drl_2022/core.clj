@@ -60,7 +60,8 @@
     state))
 
 (defn empty-state []
-  {:terrain (rand-tile-seqs 10)
+  {:player-hp 20
+   :terrain (rand-tile-seqs 10)
    :typing  ""
    :units (into {} (map (juxt (juxt :x :y) identity)) (repeatedly 10 #(hash-map :x (inc (rand-int 15)) :y (inc (rand-int 10)) :glyph (rand-nth (vals units)))))
    :quests (into (sorted-map) {"Goblins Attack Farm!" {:quest/name "Goblins Attack Farm!" :quest/mobs [{:mob/name "Goblin" :combat/dice "2d4"} {:mob/name "Goblin" :combat/dice "2d4"} {:mob/name "Goblin" :combat/dice "2d4"}]}
@@ -75,8 +76,8 @@
 (comment
   (reset! *state (empty-state)))
 
-(defn won? [{:keys [word guesses]}]
-  (= (last guesses) word))
+(defn won? [{:keys [player-hp]}]
+  (> player-hp 0))
 
 (defn on-key-press [code]
   (println :code (pr-str code))
