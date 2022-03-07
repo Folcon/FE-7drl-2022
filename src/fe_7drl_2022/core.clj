@@ -224,6 +224,26 @@
                (ui/valign 0.5
                  (ui/label quest-name font-small (if (some? color) fill-white fill-black)))))))))))
 
+(defn checkbox [checked-path child]
+  (ui/clickable
+    #(swap! *state update-in checked-path not)
+    (ui/dynamic ctx [checked (get-in @*state checked-path)
+                     {:keys [font-ui fill-text leading scale]} ctx]
+      (let [border (doto (Paint.)
+                     (.setColor (unchecked-int 0xFF000000))
+                     (.setMode PaintMode/STROKE)
+                     (.setStrokeWidth (* 1 scale)))]
+        (ui/column
+          (ui/row
+            (ui/fill border
+              (if checked
+                (ui/padding 1 1
+                  (ui/fill fill-text
+                    (ui/gap (- leading 2) (- leading 2))))
+                (ui/gap leading leading))))
+          (ui/gap 5 0)
+          child)))))
+
 (def quest-detail-ui
   (ui/dynamic ctx [{:keys [font-large stroke-light-gray stroke-dark-gray fill-green fill-yellow fill-dark-gray fill-white fill-black]} ctx
                    {:keys [quests selected-quest] :as state} @*state]
