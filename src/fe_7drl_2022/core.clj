@@ -35,8 +35,6 @@
 
 (def padding 4)
 
-(def dictionary (set ["apple"]))
-
 (def tiles [:beach :desert :forest :grassland :jungle :mountain :snow-mountain :ocean :snow :tundra])
 
 (def units
