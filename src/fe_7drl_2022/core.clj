@@ -406,9 +406,11 @@
 (def character-ui-view
   (ui/on-key-down #(type (:hui.event.key/key %))
     (ui/padding padding padding
-      (ui/dynamic ctx [{:keys [scale face-ui]} ctx]
+      (ui/dynamic ctx [{:keys [scale face-ui]} ctx
+                       characters (:characters @*state)]
         (let [font-small (Font. ^Typeface typeface (float (* scale 13)))
               fill-black (paint/fill 0xFF000000)
+              fill-yellow (paint/fill 0xFFC9B457)
               fill-light-gray (paint/fill 0xFFD4D6DA)]
           (ui/with-context
             {:font-large      (Font. ^Typeface typeface (float (* scale 26)))
@@ -418,11 +420,20 @@
              :fill-light-gray fill-light-gray
              :fill-dark-gray  (paint/fill 0xFF777C7E)
              :fill-green      (paint/fill 0xFF6AAA64)
-             :fill-yellow     (paint/fill 0xFFC9B457)
+             :fill-yellow     fill-yellow
              :stroke-light-gray (paint/stroke 0xFFD4D6DA (* 2 scale))
              :stroke-dark-gray  (paint/stroke 0xFF777C7E (* 2 scale))}
             (ui/column
-              (ui/label "Character" font-small fill-black))))))))
+              (ui/halign 0.5
+                (ui/row
+                  (interpose (ui/gap padding 2)
+                    (for [[_name character] characters]
+                      (ui/fill fill-yellow
+                        (ui/padding 10
+                          (let [{:character/keys [name]} character]
+                            (ui/column
+                              (checkbox [:characters name :character/selected]
+                                (show-map-ui character font-small fill-black)))))))))))))))))
 
 
 (def ui-views
