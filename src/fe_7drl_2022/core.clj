@@ -245,13 +245,29 @@
           child)))))
 
 (def quest-detail-ui
-  (ui/dynamic ctx [{:keys [font-large stroke-light-gray stroke-dark-gray fill-green fill-yellow fill-dark-gray fill-white fill-black]} ctx
-                   {:keys [quests selected-quest] :as state} @*state]
-    (let [fill (fn [tile]
-                 (paint/fill (render-tile-colour tile)))
-          unit-glyph (fn [_tile x y] (get-in units [[x y] :glyph] " "))]
-      (ui/column
-        (ui/label (pr-str (get quests selected-quest)) font-large fill-black)))))
+  (ui/dynamic ctx [{:keys [font-large font-small stroke-light-gray stroke-dark-gray fill-green fill-yellow fill-dark-gray fill-white fill-black]} ctx
+                   {:keys [quests selected-quest characters] :as state} @*state]
+    (ui/column
+      (show-map-ui (get quests selected-quest) font-large fill-black)
+      (ui/gap 0 padding)
+      (ui/halign 0.5
+        (ui/row
+          (interpose (ui/gap padding 2)
+            (for [[_name character] characters]
+              (ui/fill fill-yellow
+                (ui/padding 10
+                  (let [{:character/keys [name]} character]
+                    (ui/column
+                      (checkbox [:characters name :character/selected]
+                        (show-map-ui character font-small fill-black))))))))))
+      (ui/gap 0 padding)
+      (ui/halign 0.5
+        (ui/fill fill-green
+          (ui/clickable
+            #(reset! *state (empty-state))
+            (ui/padding 10 10
+              (ui/label "⇫ Begin" font-small fill-white))))))))
+
 
 (def keyboard
   (ui/dynamic ctx [{:keys [font-small fill-light-gray fill-black]} ctx
