@@ -137,6 +137,17 @@
     [["Starting Adventure"] peeps]
     encounters))
 
+(defn alive? [{hp :combat/hp :as peep}]
+  (> hp 0))
+
+(defn post-combat-peep-steps [peep {:keys [rewards]}]
+  (-> peep
+    (cond->
+      (and rewards (alive? peep))
+      (update :stuff (fnil conj []) rewards))
+    ;; de-select all peeps
+    (dissoc :peep/selected)))
+
 (defn process-quest [{:keys [quests selected-quest peeps] :as state}]
   (let [quest (get quests selected-quest)
         chosen-peeps (selected-peeps peeps)
@@ -151,7 +162,9 @@
         _ (println :names->peeps' (pr-str names->peeps'))
         peeps' (reduce-kv
                  (fn [m peep-name peep]
-                   (assoc m peep-name (get names->peeps' peep-name peep)))
+                   (let [peep' (-> (get names->peeps' peep-name peep)
+                                 (post-combat-peep-steps quest))]
+                     (assoc m peep-name peep')))
                  {}
                  peeps)
         _ (println :peeps' (pr-str peeps'))]
