@@ -90,7 +90,7 @@
             target-hp (:combat/hp target)
             rem-hp (- target-hp dmg-roll)]
         (cond->
-          (update state :messages conj (str atker-name " attacks " target-name " and " (if hits? "hits" "misses") " (" hit-roll " vs " target-def ")" (when hits? (str " dealing " dmg-roll " dmg and " (if (> rem-hp 0) (str "leaving them on " rem-hp " hp") "killing them")))))
+          (update state :message-chunks conj (str atker-name " attacks " target-name " and " (if hits? "hits" "misses") " (" hit-roll " vs " target-def ")" (when hits? (str " dealing " dmg-roll " dmg and " (if (> rem-hp 0) (str "leaving them on " rem-hp " hp") "killing them")))))
           hits?
           (assoc-in [:combatants target-name :combat/hp] rem-hp))))
     state
@@ -169,7 +169,7 @@
                  peeps)
         _ (println :peeps' (pr-str peeps'))]
     (-> state
-      (update-in [:message-log :messages] conj messages)
+      (update-in [:message-log :message-chunks] conj messages)
       (update-in [:message-log :size] + (count messages))
       (assoc :peeps peeps'))))
 
@@ -193,7 +193,7 @@
    ;:peep/selected false
    :peeps (into (sorted-map) (into {} (map (juxt first make-peep)) [["Peep 1" :mage] ["Peep 2" :fighter]]))
    :message-log {:size 2
-                 :messages[["Welcome to Fruit Economy!" "Have fun!"]]}})
+                 :message-chunks [["Welcome to Fruit Economy!" "Have fun!"]]}})
 
 (def *state (atom (empty-state)))
 
@@ -470,8 +470,8 @@
   ([limit]
    (ui/dynamic ctx [{:keys [font-small fill-light-gray fill-black]} ctx
                     {:keys [message-log]} @*state]
-     (let [{:keys [size messages]} message-log
-           message-log' (if (and limit (> size limit)) (subvec messages (- size limit)) messages)]
+     (let [{:keys [size message-chunks]} message-log
+           message-log' (if (and limit (> size limit)) (subvec message-chunks (- size limit)) message-chunks)]
        (ui/column
          (ui/gap 0 padding)
          (ui/halign 0.5
