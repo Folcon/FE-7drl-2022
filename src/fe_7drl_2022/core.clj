@@ -419,13 +419,13 @@
       (ui/halign 0.5
         (ui/row
           (interpose (ui/gap padding 2)
-            (for [[_name peep] peeps
-                  :let [alive? (> (:combat/hp peep) 0)]]
+            (for [[name peep] peeps
+                  :let [alive? (alive? peep)]]
               (ui/fill (if alive? fill-yellow fill-dark-gray)
                 (ui/padding 10
-                  (let [{:peep/keys [name]} peep]
+                  (let [display-fn (if-not alive? tombstone (partial checkbox [:peeps name :peep/selected]))]
                     (ui/column
-                      (checkbox [:peeps name :peep/selected]
+                      (display-fn
                         (show-map-ui peep font-small fill-black))))))))))
       (ui/gap 0 padding)
       (let [selected-peeps? (seq (selected-peeps peeps))]
@@ -567,14 +567,15 @@
         (let [font-small (Font. ^Typeface typeface (float (* scale 13)))
               fill-black (paint/fill 0xFF000000)
               fill-yellow (paint/fill 0xFFC9B457)
-              fill-light-gray (paint/fill 0xFFD4D6DA)]
+              fill-light-gray (paint/fill 0xFFD4D6DA)
+              fill-dark-gray (paint/fill 0xFF777C7E)]
           (ui/with-context
             {:font-large      (Font. ^Typeface typeface (float (* scale 26)))
              :font-small      font-small
              :fill-white      (paint/fill 0xFFFFFFFF)
              :fill-black      fill-black
              :fill-light-gray fill-light-gray
-             :fill-dark-gray  (paint/fill 0xFF777C7E)
+             :fill-dark-gray  fill-dark-gray
              :fill-green      (paint/fill 0xFF6AAA64)
              :fill-yellow     fill-yellow
              :stroke-light-gray (paint/stroke 0xFFD4D6DA (* 2 scale))
@@ -583,12 +584,13 @@
               (ui/halign 0.5
                 (ui/row
                   (interpose (ui/gap padding 2)
-                    (for [[_name peep] peeps]
-                      (ui/fill fill-yellow
+                    (for [[name peep] peeps
+                          :let [alive? (alive? peep)]]
+                      (ui/fill (if alive? fill-yellow fill-dark-gray)
                         (ui/padding 10
-                          (let [{:peep/keys [name]} peep]
+                          (let [display-fn (if-not alive? tombstone (partial checkbox [:peeps name :peep/selected]))]
                             (ui/column
-                              (checkbox [:peeps name :peep/selected]
+                              (display-fn
                                 (show-map-ui peep font-small fill-black)))))))))))))))))
 
 (def messages-ui-view
