@@ -411,7 +411,7 @@
       (ui/padding 5
         ((if lead-col? ui/row ui/column)
          (ui/label (str k) font fill)
-         (ui/gap 10 0)
+         (ui/gap 10 5)
          (show-val-ui v font fill lead-col?)))))))
 
 (def quest-detail-ui
