@@ -169,7 +169,8 @@
                  peeps)
         _ (println :peeps' (pr-str peeps'))]
     (-> state
-      (update :message-log into messages)
+      (update-in [:message-log :messages] conj messages)
+      (update-in [:message-log :size] + (count messages))
       (assoc :peeps peeps'))))
 
 (defn make-peep [[name class]]
@@ -191,7 +192,8 @@
    :selected-quest "Cull Local Rats!"
    ;:peep/selected false
    :peeps (into (sorted-map) (into {} (map (juxt first make-peep)) [["Peep 1" :mage] ["Peep 2" :fighter]]))
-   :message-log ["Welcome to Fruit Economy!" "Have fun!"]})
+   :message-log {:size 2
+                 :messages[["Welcome to Fruit Economy!" "Have fun!"]]}})
 
 (def *state (atom (empty-state)))
 
@@ -468,8 +470,8 @@
   ([limit]
    (ui/dynamic ctx [{:keys [font-small fill-light-gray fill-black]} ctx
                     {:keys [message-log]} @*state]
-     (let [size (count message-log)
-           message-log' (if (and limit (> size limit)) (subvec message-log (- size limit)) message-log)]
+     (let [{:keys [size messages]} message-log
+           message-log' (if (and limit (> size limit)) (subvec messages (- size limit)) messages)]
        (ui/column
          (ui/gap 0 padding)
          (ui/halign 0.5
