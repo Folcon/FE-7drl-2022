@@ -537,7 +537,8 @@
          (ui/fill fill-yellow
            (ui/row
              (ui/padding 10 10
-               (ui/label (str "Day " (inc (:tick @*state))) font-small fill-black))
+               (ui/dynamic ctx [tick (:tick @*state)]
+                 (ui/label (str "Day " (inc tick)) font-small fill-black)))
              (ui/fill fill-white
                (ui/clickable
                  #(reset! *state (empty-state))
