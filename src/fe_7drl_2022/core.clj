@@ -362,6 +362,20 @@
           (ui/gap 5 0)
           child)))))
 
+(defn tombstone [child]
+  (ui/dynamic ctx [{:keys [font-ui fill-text leading scale]} ctx]
+    (let [border (doto (Paint.)
+                   (.setColor (unchecked-int 0xFF000000))
+                   (.setMode PaintMode/STROKE)
+                   (.setStrokeWidth (* 1 scale)))]
+      (ui/column
+        (ui/row
+          (ui/fill border
+            (ui/padding 5 5
+              (ui/label "💀" font-ui fill-text))))
+        (ui/gap 5 0)
+        child))))
+
 (declare show-map-ui)
 
 (defn show-val-ui [v font fill lead-col?]
