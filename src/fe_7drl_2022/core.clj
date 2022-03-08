@@ -90,7 +90,7 @@
             target-hp (:combat/hp target)
             rem-hp (- target-hp dmg-roll)]
         (cond->
-          (update state :message-chunks conj (str atker-name " attacks " target-name " and " (if hits? "hits" "misses") " (" hit-roll " vs " target-def ")" (when hits? (str " dealing " dmg-roll " dmg and " (if (> rem-hp 0) (str "leaving them on " rem-hp " hp") "killing them")))))
+          (update state :messages conj (str atker-name " attacks " target-name " and " (if hits? "hits" "misses") " (" hit-roll " vs " target-def ")" (when hits? (str " dealing " dmg-roll " dmg and " (if (> rem-hp 0) (str "leaving them on " rem-hp " hp") "killing them")))))
           hits?
           (assoc-in [:combatants target-name :combat/hp] rem-hp))))
     state
