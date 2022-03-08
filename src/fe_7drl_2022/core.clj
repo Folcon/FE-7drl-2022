@@ -465,17 +465,20 @@
             (ui/gap padding 0)
             (key "⌫" {:width (+ (* 2 25) padding), :code "Backspace"})))))))
 
-(defn nested-limit [coll limit]
-  (reduce
-    (fn [[rem v] item]
-      (let [size (count item)
-            rem' (- rem size)]
-        (cond
-          (< rem size) (reduced (conj v (subvec item 0 (- size rem))))
-          (> rem' 0) [rem' (conj v item)]
-          (zero? rem') (reduced (conj v item)))))
-    [limit []]
-    coll))
+(defn nested-limit
+  ([coll limit] (nested-limit coll limit nil))
+  ([coll limit elide-str]
+   (let [cond-add-elide (fn [v] (if elide-str (conj v elide-str) v))]
+     (reduce
+       (fn [[rem v] item]
+         (let [size (count item)
+               rem' (- rem size)]
+           (cond
+             (< rem size) (reduced (conj v (cond-add-elide (subvec item 0 (- size rem)))))
+             (> rem' 0) [rem' (conj v item)]
+             (zero? rem') (reduced (conj v item)))))
+       [limit []]
+       coll))))
 
 (comment
   ;; Can turn to tests later...
@@ -494,7 +497,7 @@
    (ui/dynamic ctx [{:keys [font-small fill-light-gray fill-black scale]} ctx
                     {:keys [message-log]} @*state]
      (let [{:keys [size message-chunks]} message-log
-           message-log' (if (and limit (> size limit)) (nested-limit message-chunks limit) message-chunks)]
+           message-log' (if (and limit (> size limit)) (nested-limit message-chunks limit "...") message-chunks)]
        (ui/column
          (ui/gap 0 padding)
          (ui/halign 0.5
