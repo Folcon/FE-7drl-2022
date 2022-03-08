@@ -6,7 +6,8 @@
    [io.github.humbleui.paint :as paint]
    [io.github.humbleui.profile :as profile]
    [io.github.humbleui.window :as window]
-   [io.github.humbleui.ui :as ui])
+   [io.github.humbleui.ui :as ui]
+   [fe-7drl-2022.components :as cui])
   (:import
    [io.github.humbleui.jwm App EventFrame EventMouseButton EventMouseMove EventMouseScroll EventKey Window]
    [io.github.humbleui.skija Canvas FontMgr FontStyle Typeface Font Paint PaintMode]
