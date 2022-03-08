@@ -416,7 +416,7 @@
   (ui/dynamic ctx [{:keys [font-large font-small stroke-light-gray stroke-dark-gray fill-green fill-yellow fill-dark-gray fill-white fill-black]} ctx
                    {:keys [quests selected-quest peeps] :as state} @*state]
     (ui/column
-      (show-map-ui (get quests selected-quest) font-large fill-black)
+      (show-map-ui (get quests selected-quest) font-small fill-black)
       (ui/gap 0 padding)
       (ui/halign 0.5
         (ui/row
