@@ -474,7 +474,7 @@
          (let [size (count item)
                rem' (- rem size)]
            (cond
-             (< rem size) (reduced (conj v (cond-add-elide (subvec item 0 (- size rem)))))
+             (< rem size) (reduced (conj v (cond-add-elide (subvec item 0 rem))))
              (> rem' 0) [rem' (conj v item)]
              (zero? rem') (reduced (conj v item)))))
        [limit []]
@@ -484,12 +484,15 @@
   ;; Can turn to tests later...
   (let [;; 3 => [[1 2] [3]]
         ;; 4 => [[1 2] [3 4]]
-        coll [[1 2] [3 4] [5 6]]]
+        coll [[1 2] [3 4] [5 6]]
+        coll' [[1 2] [3 4 5 6 7 8 9 10]]]
     (and
       (= [[1 2] [3]]
          (nested-limit coll 3))
       (= [[1 2] [3 4]]
-         (nested-limit coll 4)))))
+         (nested-limit coll 4))
+      (= [[1 2] [3 4]]
+        (nested-limit coll' 4)))))
 
 (defn message-log-ui
   ([] (message-log-ui nil))
