@@ -468,7 +468,7 @@
 (defn message-log-ui
   ([] (message-log-ui nil))
   ([limit]
-   (ui/dynamic ctx [{:keys [font-small fill-light-gray fill-black]} ctx
+   (ui/dynamic ctx [{:keys [font-small fill-light-gray fill-black scale]} ctx
                     {:keys [message-log]} @*state]
      (let [{:keys [size message-chunks]} message-log
            message-log' (if (and limit (> size limit)) (subvec message-chunks (- size limit)) message-chunks)]
@@ -483,7 +483,20 @@
                [:stretch 1
                 (ui/column
                   (interpose (ui/gap 2 padding)
-                    (map #(ui/halign 0.5 (ui/label (str %) font-small fill-black)) message-log')))]))))))))
+                    (map
+                      (fn [message-chunk]
+                        (let [border (doto (Paint.)
+                                       (.setColor (unchecked-int 0xFF000000))
+                                       (.setMode PaintMode/STROKE)
+                                       (.setStrokeWidth (* 1 scale)))]
+                          (ui/halign 0.5
+                            (ui/fill border
+                              (ui/padding 5 5
+                                (ui/column
+                                  (interpose (ui/gap 2 padding)
+                                    (for [message message-chunk]
+                                      (ui/halign 0.5 (ui/label (str message) font-small fill-black))))))))))
+                      message-log')))]))))))))
 
 (def map-ui-view
   (ui/on-key-down #(on-key-press (:hui.event.key/key %))
