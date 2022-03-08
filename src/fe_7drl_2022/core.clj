@@ -476,7 +476,7 @@
          (ui/gap 0 padding)
          (ui/halign 0.5
            (ui/label "[ Message Log ]" font-small fill-black))
-         (ui/gap 0 padding)
+         (ui/gap 0 (* padding 2))
          (ui/halign 0.5
            (ui/halign 0.5
              (ui/column
