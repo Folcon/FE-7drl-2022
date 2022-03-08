@@ -463,8 +463,8 @@
             (ui/gap padding 0)
             (key "⌫" {:width (+ (* 2 25) padding), :code "Backspace"})))))))
 
-(defn message-log
-  ([] (message-log nil))
+(defn message-log-ui
+  ([] (message-log-ui nil))
   ([limit]
    (ui/dynamic ctx [{:keys [font-small fill-light-gray fill-black]} ctx
                     {:keys [message-log]} @*state]
@@ -519,7 +519,7 @@
               (ui/halign 0.5 field)
               [:stretch 1 nil]
               (ui/gap 0 padding)
-              (ui/halign 0.5 (message-log 10)))))))))
+              (ui/halign 0.5 (message-log-ui 10)))))))))
 
 (def quest-ui-view
   (ui/on-key-down #(on-key-press (:hui.event.key/key %))
@@ -557,7 +557,7 @@
               (ui/halign 0.5 quest-detail-ui)
               [:stretch 1 nil]
               (ui/gap 0 padding)
-              (ui/halign 0.5 (message-log 10)))))))))
+              (ui/halign 0.5 (message-log-ui 10)))))))))
 
 (def peep-ui-view
   (ui/on-key-down #(on-key-press (:hui.event.key/key %))
@@ -618,7 +618,7 @@
                (ui/vscrollbar
                  (ui/vscroll
                    (ui/column
-                     (message-log))))])))))))
+                     (message-log-ui))))])))))))
 
 (def ui-views
   ;; exploiting the fact that as long as array-map doesn't grow, it keeps insertion order
