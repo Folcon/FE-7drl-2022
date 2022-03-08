@@ -140,7 +140,7 @@
 (defn alive? [{hp :combat/hp :as peep}]
   (> hp 0))
 
-(defn post-combat-peep-steps [peep {:keys [rewards]}]
+(defn post-combat-peep-steps [peep {:quest/keys [rewards]}]
   (-> peep
     (cond->
       (and rewards (alive? peep))
