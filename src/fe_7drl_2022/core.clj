@@ -527,6 +527,19 @@
                                       (ui/halign 0.5 (ui/label (str message) font-small fill-black))))))))))
                       message-log')))]))))))))
 
+(def top-bar-ui
+  (ui/dynamic ctx [{:keys [font-small fill-black fill-yellow fill-white scale]} ctx]
+    (ui/column
+      [:stretch 1
+       (ui/padding 0 0 0 10
+         (ui/fill fill-yellow
+           (ui/row
+             (ui/fill fill-white
+               (ui/clickable
+                 #(reset! *state (empty-state))
+                 (ui/padding 10 10
+                   (ui/label "↻ Reset" font-small fill-black)))))))])))
+
 (def map-ui-view
   (ui/on-key-down #(on-key-press (:hui.event.key/key %))
     (ui/padding padding padding
@@ -546,11 +559,7 @@
              :stroke-light-gray (paint/stroke 0xFFD4D6DA (* 2 scale))
              :stroke-dark-gray  (paint/stroke 0xFF777C7E (* 2 scale))}
             (ui/column
-              (ui/halign 0.5
-                (ui/clickable
-                  #(reset! *state (empty-state))
-                  (ui/padding 10 10
-                    (ui/label "↻ Reset" font-small fill-black))))
+              top-bar-ui
               (ui/halign 0.5
                 (ui/dynamic ctx [_ (:selected-quest @*state)]
                   (ui/row
@@ -584,11 +593,7 @@
              :stroke-light-gray (paint/stroke 0xFFD4D6DA (* 2 scale))
              :stroke-dark-gray  (paint/stroke 0xFF777C7E (* 2 scale))}
             (ui/column
-              (ui/halign 0.5
-                (ui/clickable
-                  #(reset! *state (empty-state))
-                  (ui/padding 10 10
-                    (ui/label "↻ Reset" font-small fill-black))))
+              top-bar-ui
               (ui/halign 0.5
                 (ui/dynamic ctx [_ (:selected-quest @*state)]
                   (ui/row
@@ -625,6 +630,7 @@
              :stroke-light-gray (paint/stroke 0xFFD4D6DA (* 2 scale))
              :stroke-dark-gray  (paint/stroke 0xFF777C7E (* 2 scale))}
             (ui/column
+              top-bar-ui
               (ui/halign 0.5
                 (ui/row
                   (interpose (ui/gap padding 2)
@@ -658,6 +664,7 @@
              :stroke-light-gray (paint/stroke 0xFFD4D6DA (* 2 scale))
              :stroke-dark-gray  (paint/stroke 0xFF777C7E (* 2 scale))}
             (ui/column
+              top-bar-ui
               [:stretch 1
                (ui/vscrollbar
                  (ui/vscroll
