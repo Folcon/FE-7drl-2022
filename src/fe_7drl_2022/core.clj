@@ -667,8 +667,8 @@
 (def ui-views
   ;; exploiting the fact that as long as array-map doesn't grow, it keeps insertion order
   (array-map
-    "Map" map-ui-view
     "Quest" quest-ui-view
+    "Map" map-ui-view
     "Peep" peep-ui-view
     "Messages" messages-ui-view))
 
