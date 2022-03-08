@@ -184,6 +184,7 @@
 
 (defn empty-state []
   {:player-hp 20
+   :tick 0
    :terrain (rand-tile-seqs 10)
    :typing  ""
    :units (into {} (map (juxt (juxt :x :y) identity)) (repeatedly 10 #(hash-map :x (inc (rand-int 15)) :y (inc (rand-int 10)) :glyph (rand-nth (vals units)))))
@@ -534,6 +535,8 @@
        (ui/padding 0 0 0 10
          (ui/fill fill-yellow
            (ui/row
+             (ui/padding 10 10
+               (ui/label (str "Day " (inc (:tick @*state))) font-small fill-black))
              (ui/fill fill-white
                (ui/clickable
                  #(reset! *state (empty-state))
