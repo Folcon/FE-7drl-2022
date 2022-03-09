@@ -6,6 +6,12 @@
 
 
 ;; Should be in io.github.humbleui.ui
+(defn fragment [& children]
+  (list children))
+
+(def <> #'fragment)
+
+
 (deftype+ CustomUI [width height on-paint on-event ^:mut child-rect]
   IComponent
   (-measure [_ ctx cs]
