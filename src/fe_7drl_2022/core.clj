@@ -579,7 +579,7 @@
               (ui/halign 0.5 field)
               [:stretch 1 nil]
               (ui/gap 0 padding)
-              (ui/halign 0.5 (message-log-ui 9)))))))))
+              (ui/halign 0.5 (message-log-ui 6)))))))))
 
 (def quest-ui-view
   (ui/on-key-down #(on-key-press (:hui.event.key/key %))
