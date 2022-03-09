@@ -184,6 +184,12 @@
 (defn make-goblin [name]
   {:mob/name name :combat/hit "1d6" :combat/dmg "2d4" :combat/def 4 :combat/hp 4 :combat/max-hp 4})
 
+(defn make-building [[name class]]
+  {:building/name name :building/class class})
+
+(defn used? [{used :building/used :as _building}]
+  used)
+
 (defn empty-state []
   {:player-hp 20
    :tick 0
@@ -195,6 +201,7 @@
    :selected-quest "Cull Local Rats!"
    ;:peep/selected false
    :peeps (into (sorted-map) (into {} (map (juxt first make-peep)) [["Peep 1" :mage] ["Peep 2" :fighter]]))
+   :buildings (into (sorted-map) (into {} (map (juxt first make-building)) [["Mage Building" :mage] ["Rogue Building" :rogue] ["Fighter Building" :fighter] ["Cleric Building" :cleric]]))
    :message-log {:size 2
                  :message-chunks [["Welcome to Fruit Economy!" "Have fun!"]]}})
 
@@ -619,9 +626,12 @@
   (ui/on-key-down #(on-key-press (:hui.event.key/key %))
     (ui/padding padding padding
       (ui/dynamic ctx [{:keys [scale face-ui]} ctx
-                       peeps (:peeps @*state)]
+                       peeps (:peeps @*state)
+                       buildings (:buildings @*state)
+                       selected-building (:selected-building @*state)]
         (let [font-small (Font. ^Typeface typeface (float (* scale 13)))
               fill-black (paint/fill 0xFF000000)
+              fill-green (paint/fill 0xFF6AAA64)
               fill-yellow (paint/fill 0xFFC9B457)
               fill-light-gray (paint/fill 0xFFD4D6DA)
               fill-dark-gray (paint/fill 0xFF777C7E)]
@@ -632,12 +642,24 @@
              :fill-black      fill-black
              :fill-light-gray fill-light-gray
              :fill-dark-gray  fill-dark-gray
-             :fill-green      (paint/fill 0xFF6AAA64)
+             :fill-green      fill-green
              :fill-yellow     fill-yellow
              :stroke-light-gray (paint/stroke 0xFFD4D6DA (* 2 scale))
              :stroke-dark-gray  (paint/stroke 0xFF777C7E (* 2 scale))}
             (ui/column
               top-bar-ui
+              (ui/halign 0.5
+                (ui/row
+                  (interpose (ui/gap padding 2)
+                    (for [[name building] buildings
+                          :let [used? (used? building)]]
+                      (ui/fill (if used? fill-dark-gray fill-green)
+                        (ui/padding 10
+                          (let [display-fn (if-not used? (partial cui/radio-button *state name [:selected-building]) identity)]
+                            (ui/column
+                              (display-fn
+                                (show-map-ui building font-small fill-black))))))))))
+              (ui/gap 0 padding)
               (ui/halign 0.5
                 (ui/row
                   (interpose (ui/gap padding 2)
