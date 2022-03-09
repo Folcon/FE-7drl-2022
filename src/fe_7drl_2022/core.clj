@@ -214,7 +214,7 @@
                                "Cull Local Rats!" {:quest/name "Cull Local Rats!" :quest/mobs [(mapv make-rat ["Rat 1"]) (mapv make-rat ["Rat 1" "Rat 2" "Rat 3"])]  :quest/rewards {:item/name "Gold Coin"}}})
    :selected-quest "Cull Local Rats!"
    ;:peep/selected false
-   :peeps (into (sorted-map) (into {} (map (juxt first make-peep)) [["Peep 1" :mage] ["Peep 2" :fighter]]))
+   :peeps (into (sorted-map) (into {} (map (juxt first make-peep)) [["Peep 1" (rand-nth [:mage :rogue :fighter :cleric])] ["Peep 2" (rand-nth [:mage :rogue :fighter :cleric])]]))
    :buildings (into (sorted-map) (into {} (map (juxt first make-building)) [["Mage Building" :mage] ["Rogue Building" :rogue] ["Fighter Building" :fighter] ["Cleric Building" :cleric]]))
    :message-log {:size 2
                  :message-chunks [["Welcome to Fruit Economy!" "Have fun!"]]}})
