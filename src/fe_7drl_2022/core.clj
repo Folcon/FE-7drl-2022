@@ -694,13 +694,14 @@
                               (display-fn
                                 (show-map-ui peep font-small fill-black))))))))))
               (let [power? (> power 0)
-                    active? (and selected-building power?)]
+                    active? (and selected-building power?)
+                    btn-message (if power? (str "Activate " selected-building " with one Agent") (str "Your Agents are all busy, why not send some Peeps on a Quest?"))]
                 (c-hui/<>
                   (when selected-building
                     (ui/gap 0 padding)
                     (ui/halign 0.5
                       (ui/padding 10 10
-                        (ui/label (str "Activate " selected-building " with one Agent") font-small fill-black))))
+                        (ui/label btn-message font-small fill-black))))
                   (ui/gap 0 padding)
                   (ui/halign 0.5
                     (ui/fill (if active? fill-green fill-dark-gray)
