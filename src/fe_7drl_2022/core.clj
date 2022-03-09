@@ -12,7 +12,8 @@
   (:import
    [io.github.humbleui.jwm App EventFrame EventMouseButton EventMouseMove EventMouseScroll EventKey Window]
    [io.github.humbleui.skija Canvas FontMgr FontStyle Typeface Font Paint PaintMode]
-   [io.github.humbleui.types IPoint]))
+   [io.github.humbleui.types IPoint])
+  (:gen-class))
 
 
 (set! *warn-on-reflection* true)
