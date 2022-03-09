@@ -174,7 +174,8 @@
       (update-in [:message-log :message-chunks] conj messages)
       (update-in [:message-log :size] + (count messages))
       (assoc :peeps peeps')
-      (update :tick inc))))
+      (update :tick inc)
+      (assoc :power 2))))
 
 (defn make-peep [[name class]]
   {:peep/name name :peep/class class :combat/hit "2d4" :combat/dmg "2d4" :combat/def 4 :combat/hp 5 :combat/max-hp 5})
