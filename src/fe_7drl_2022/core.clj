@@ -545,7 +545,7 @@
                (ui/clickable
                  #(reset! *state (empty-state))
                  (ui/padding 10 10
-                   (ui/label "↻ Reset" font-small fill-black)))))))])))
+                   (ui/label "↻ Restart" font-small fill-black)))))))])))
 
 (def map-ui-view
   (ui/on-key-down #(on-key-press (:hui.event.key/key %))
