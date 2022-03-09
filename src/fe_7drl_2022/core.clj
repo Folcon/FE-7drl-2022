@@ -563,6 +563,9 @@
              (ui/padding 10 10
                (ui/dynamic ctx [power (:power @*state)]
                  (ui/label (str "Agents [" (apply str (repeat power "♙")) "]") font-small fill-black)))
+             (ui/padding 10 10
+               (ui/dynamic ctx [player-hp (:player-hp @*state)]
+                 (ui/label (str "Renown " (str player-hp)) font-small fill-black)))
              [:stretch 1 nil]
              (ui/fill fill-white
                (ui/clickable
