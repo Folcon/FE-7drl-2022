@@ -7,6 +7,7 @@
    [io.github.humbleui.profile :as profile]
    [io.github.humbleui.window :as window]
    [io.github.humbleui.ui :as ui]
+   [fe-7drl-2022.humble-ui :as c-hui]
    [fe-7drl-2022.components :as cui])
   (:import
    [io.github.humbleui.jwm App EventFrame EventMouseButton EventMouseMove EventMouseScroll EventKey Window]
@@ -643,8 +644,10 @@
       (ui/dynamic ctx [{:keys [scale face-ui]} ctx
                        peeps (:peeps @*state)
                        buildings (:buildings @*state)
-                       selected-building (:selected-building @*state)]
+                       selected-building (:selected-building @*state)
+                       power (:power @*state)]
         (let [font-small (Font. ^Typeface typeface (float (* scale 13)))
+              fill-white (paint/fill 0xFFFFFFFF)
               fill-black (paint/fill 0xFF000000)
               fill-green (paint/fill 0xFF6AAA64)
               fill-yellow (paint/fill 0xFFC9B457)
@@ -653,7 +656,7 @@
           (ui/with-context
             {:font-large      (Font. ^Typeface typeface (float (* scale 26)))
              :font-small      font-small
-             :fill-white      (paint/fill 0xFFFFFFFF)
+             :fill-white      fill-white
              :fill-black      fill-black
              :fill-light-gray fill-light-gray
              :fill-dark-gray  fill-dark-gray
@@ -685,13 +688,22 @@
                           (let [display-fn (if-not alive? tombstone (partial checkbox [:peeps name :peep/selected]))]
                             (ui/column
                               (display-fn
-                                (show-map-ui peep font-small fill-black)))))))))))))))))
-              (ui/halign 0.5
-                (ui/fill (if selected-building fill-green fill-dark-gray)
-                  (ui/clickable
-                    #(when selected-building (swap! *state process-building-activation))
-                    (ui/padding 10 10
-                      (ui/label "⇫ Act" font-small fill-white))))))))))))
+                                (show-map-ui peep font-small fill-black))))))))))
+              (let [power? (> power 0)
+                    active? (and selected-building power?)]
+                (c-hui/<>
+                  (when selected-building
+                    (ui/gap 0 padding)
+                    (ui/halign 0.5
+                      (ui/padding 10 10
+                        (ui/label (str "Activate " selected-building " with one Agent") font-small fill-black))))
+                  (ui/gap 0 padding)
+                  (ui/halign 0.5
+                    (ui/fill (if active? fill-green fill-dark-gray)
+                      (ui/clickable
+                        #(when active? (swap! *state process-building-activation))
+                        (ui/padding 10 10
+                          (ui/label "⇫ Act" font-small fill-white))))))))))))))
 
 (def messages-ui-view
   (ui/on-key-down #(on-key-press (:hui.event.key/key %))
