@@ -190,6 +190,17 @@
 (defn used? [{used :building/used :as _building}]
   used)
 
+(defn process-building-activation [{:keys [selected-building buildings peeps] :as state}]
+  (let [activated-building (get buildings selected-building)
+        peep-name (str "Peep " (rand-int 10000))
+        new-peep (make-peep [peep-name (:building/class activated-building)])]
+    (println activated-building new-peep)
+    (-> state
+      (assoc-in [:buildings selected-building :building/used] true)
+      (update :power dec)
+      (assoc-in [:peeps peep-name] new-peep)
+      (dissoc :selected-building))))
+
 (defn empty-state []
   {:player-hp 20
    :tick 0
@@ -675,6 +686,12 @@
                             (ui/column
                               (display-fn
                                 (show-map-ui peep font-small fill-black)))))))))))))))))
+              (ui/halign 0.5
+                (ui/fill (if selected-building fill-green fill-dark-gray)
+                  (ui/clickable
+                    #(when selected-building (swap! *state process-building-activation))
+                    (ui/padding 10 10
+                      (ui/label "⇫ Act" font-small fill-white))))))))))))
 
 (def messages-ui-view
   (ui/on-key-down #(on-key-press (:hui.event.key/key %))
