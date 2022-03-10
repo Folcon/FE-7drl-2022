@@ -187,9 +187,11 @@
         _ (println :names->peeps' (pr-str names->peeps'))
         peeps' (reduce-kv
                  (fn [m peep-name peep]
-                   (let [peep' (-> (get names->peeps' peep-name peep)
-                                 (post-combat-peep-steps quest))]
-                     (assoc m peep-name peep')))
+                   (->>
+                     (if-let [peep' (get names->peeps' peep-name)]
+                       (post-combat-peep-steps peep' quest)
+                       peep)
+                     (assoc m peep-name)))
                  {}
                  peeps)
         _ (println :peeps' (pr-str peeps'))
