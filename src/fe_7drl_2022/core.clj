@@ -192,13 +192,16 @@
                      (assoc m peep-name peep')))
                  {}
                  peeps)
-        _ (println :peeps' (pr-str peeps'))]
+        _ (println :peeps' (pr-str peeps'))
+        dead-peeps (into [] (remove alive?) (vals names->peeps'))
+        _ (println :dead-peeps (pr-str dead-peeps))]
     (-> state
       (update-in [:message-log :message-chunks] conj messages)
       (update-in [:message-log :size] + (count messages))
       (assoc :peeps peeps')
       (update :tick inc)
-      (assoc :power 2))))
+      (assoc :power 2)
+      (update :player-hp #(max (- % (count dead-peeps)) 0)))))
 
 (defn make-peep [[name class]]
   {:peep/name name :peep/class class :combat/init "1d20+3" :combat/hit "1d20+4" :combat/dmg "2d4" :combat/def 14 :combat/hp 12 :combat/max-hp 12})
