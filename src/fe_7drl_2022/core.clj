@@ -183,7 +183,7 @@
       (let [op (condp = v
                  :inc inc
                  :dec dec)]
-        (update-in m k v)))
+        (update-in m k op)))
     state
     (if success? success failure)))
 
