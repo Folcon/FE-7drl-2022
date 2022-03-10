@@ -201,13 +201,13 @@
       (assoc :power 2))))
 
 (defn make-peep [[name class]]
-  {:peep/name name :peep/class class :combat/hit "2d4" :combat/dmg "2d4" :combat/def 4 :combat/hp 5 :combat/max-hp 5})
+  {:peep/name name :peep/class class :combat/init "1d20+3" :combat/hit "1d20+4" :combat/dmg "2d4" :combat/def 14 :combat/hp 12 :combat/max-hp 12})
 
 (defn make-rat [name]
-  {:mob/name name :combat/hit "1d6" :combat/dmg "2d4" :combat/def 4 :combat/hp 2 :combat/max-hp 2})
+  {:mob/name name :combat/stealth "1d20+16" :combat/init "1d20+2" :combat/hit "1d20+4" :combat/dmg "1d3-4" :combat/def 14 :combat/hp 1 :combat/max-hp 1})
 
 (defn make-goblin [name]
-  {:mob/name name :combat/hit "1d6" :combat/dmg "2d4" :combat/def 4 :combat/hp 4 :combat/max-hp 4})
+  {:mob/name name :combat/stealth "1d20+6" :combat/init "1d20+2" :combat/hit "1d20+4" :combat/dmg "1d6+2" :combat/def 15 :combat/hp 7 :combat/max-hp 7})
 
 (defn make-building [[name class]]
   {:building/name name :building/class class})
