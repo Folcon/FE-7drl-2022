@@ -166,6 +166,9 @@
 (defn alive? [{hp :combat/hp :as peep}]
   (> hp 0))
 
+(defn quest-success? [{peep :peep :as alive}]
+  peep)
+
 (defn post-combat-peep-steps [peep {:quest/keys [rewards]}]
   (-> peep
     (cond->
@@ -173,6 +176,16 @@
       (update :stuff (partial merge-with +) rewards))
     ;; de-select all peeps
     (dissoc :peep/selected)))
+
+(defn process-quest-consequences [state {:quest/keys [success failure] :as quest} success?]
+  (reduce-kv
+    (fn [m k v]
+      (let [op (condp = v
+                 :inc inc
+                 :dec dec)]
+        (update-in m k v)))
+    state
+    (if success? success failure)))
 
 (defn process-quest [{:keys [quests selected-quest peeps] :as state}]
   (let [quest (get quests selected-quest)
@@ -206,7 +219,8 @@
       (update :tick inc)
       (assoc :power 2)
       (update :buildings #(into {} (map (fn [[k v]] [k (dissoc v :building/used)])) %))
-      (update :player-hp #(max (- % (count dead-peeps)) 0)))))
+      (update :player-hp #(max (- % (count dead-peeps)) 0))
+      (process-quest-consequences quest (quest-success? alive)))))
 
 (defn make-peep [[name class]]
   {:peep/name name :peep/class class :combat/init "1d20+3" :combat/hit "1d20+4" :combat/dmg "2d4" :combat/def 14 :combat/hp 12 :combat/max-hp 12})
@@ -238,11 +252,12 @@
   {:player-hp 10
    :tick 0
    :power 2
+   :reputation {:goblins 5 :rats 5}
    :terrain (rand-tile-seqs 10)
    :typing  ""
    :units (into {} (map (juxt (juxt :x :y) identity)) (repeatedly 10 #(hash-map :x (inc (rand-int 15)) :y (inc (rand-int 10)) :glyph (rand-nth (vals units)))))
-   :quests (into (sorted-map) {"Goblins Attack Farm!" {:quest/name "Goblins Attack Farm!" :quest/mobs [(mapv make-goblin ["Goblin 1" "Goblin 2" "Goblin 3"])] :quest/rewards {:copper (roll->result (roll "2d6+2"))}}
-                               "Cull Local Rats!" {:quest/name "Cull Local Rats!" :quest/mobs [(mapv make-rat ["Rat 1"]) (mapv make-rat ["Rat 1" "Rat 2" "Rat 3"])] :quest/rewards {:copper (roll->result (roll "1d3+2"))}}})
+   :quests (into (sorted-map) {"Goblins Attack Farm!" {:quest/name "Goblins Attack Farm!" :quest/mobs [(mapv make-goblin ["Goblin 1" "Goblin 2" "Goblin 3"])] :quest/rewards {:copper (roll->result (roll "2d6+2"))} :quest/success {[:reputation :goblins] :inc} :quest/failure {[:reputation :goblins] :dec}}
+                               "Cull Local Rats!" {:quest/name "Cull Local Rats!" :quest/mobs [(mapv make-rat ["Rat 1"]) (mapv make-rat ["Rat 1" "Rat 2" "Rat 3"])] :quest/rewards {:copper (roll->result (roll "1d3+2"))} :quest/success {[:reputation :rats] :inc} :quest/failure {[:reputation :rats] :dec}}})
    :selected-quest "Cull Local Rats!"
    ;:peep/selected false
    :peeps (into (sorted-map) (into {} (map (juxt first make-peep)) [["Peep 1" (rand-nth [:mage :rogue :fighter :cleric])] ["Peep 2" (rand-nth [:mage :rogue :fighter :cleric])]]))
