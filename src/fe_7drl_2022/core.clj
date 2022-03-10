@@ -81,6 +81,12 @@
                  (+ acc op-or-val)))]
     (reduce calc dice-seq)))
 
+(comment
+  (= (roll "1d1") [1])
+  (= (roll "2d1") [1 1])
+  (= (roll->result (roll "1d1+1")) 2)
+  (= (roll->result (roll "2d1+1")) 3))
+
 (defn selected-peeps [peeps] (into [] (comp (map second) (filter :peep/selected)) peeps))
 
 (defn peep? [entity]
