@@ -122,8 +122,10 @@
 (defn alive-on-each-side [combatants]
   (frequencies (into [] (comp (map second) (remove #(>= 0 (:combat/hp %))) (map #(cond (peep? %) :peep (mob? %) :mob :else :other))) combatants)))
 
+(defn roll-initiative [combatants-coll] (mapv second (sort-by first (mapv (fn [m] [(roll->result (roll (:combat/init m))) m]) combatants-coll))))
+
 (defn combat-encounter [peeps mobs]
-  (let [init-initiative (shuffle (into peeps mobs))
+  (let [init-initiative (roll-initiative (into peeps mobs))
         init-combat-state {:messages []
                            :combatants (into {} (map (juxt #(or (:peep/name %) (:mob/name %)) identity)) init-initiative)}]
     (println :init-initiative (pr-str init-initiative))
