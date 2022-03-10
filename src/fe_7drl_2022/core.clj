@@ -231,7 +231,7 @@
       (dissoc :selected-building))))
 
 (defn empty-state []
-  {:player-hp 20
+  {:player-hp 10
    :tick 0
    :power 2
    :terrain (rand-tile-seqs 10)
