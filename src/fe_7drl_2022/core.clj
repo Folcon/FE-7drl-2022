@@ -254,6 +254,9 @@
 (defn won? [{:keys [player-hp]}]
   (> player-hp 0))
 
+(defn lost? [{:keys [player-hp]}]
+  (<= player-hp 0))
+
 (defn on-key-press [code]
   (println :code (pr-str code))
   #_
@@ -831,7 +834,8 @@
           (ui/label text font-ui fill-text))))))
 
 (def app
-  (ui/dynamic ctx [scale (:scale ctx)]
+  (ui/dynamic ctx [scale (:scale ctx)
+                   player-hp (:player-hp @*state)]
     (let [font-ui   (Font. face-default (float (* 13 scale)))
           leading   (-> font-ui .getMetrics .getCapHeight Math/ceil (/ scale))
           fill-text (doto (Paint.) (.setColor (unchecked-int 0xFF000000)))]
@@ -839,28 +843,30 @@
                         :font-ui   font-ui
                         :leading   leading
                         :fill-text fill-text}
-        (ui/row
-          (ui/column
+        (if (lost? @*state)
+          lose-ui-view
+          (ui/row
+            (ui/column
+              [:stretch 1
+               (ui/vscrollbar
+                 (ui/vscroll
+                   (ui/column
+                     (for [[name _ui] ui-views]
+                       (ui/clickable
+                         #(reset! *selected-ui-view name)
+                         (ui/dynamic ctx [selected? (= name @*selected-ui-view)
+                                          hovered?  (:hui/hovered? ctx)]
+                           (let [label (ui/padding 20 leading
+                                         (ui/label name font-ui fill-text))]
+                             (cond
+                               selected? (ui/fill (doto (Paint.) (.setColor (unchecked-int 0xFFB2D7FE))) label)
+                               hovered?  (ui/fill (doto (Paint.) (.setColor (unchecked-int 0xFFE1EFFA))) label)
+                               :else     label))))))))]
+              (ui/padding 10 10
+                (atom-checkbox *floating "On top")))
             [:stretch 1
-             (ui/vscrollbar
-               (ui/vscroll
-                 (ui/column
-                   (for [[name _ui] ui-views]
-                     (ui/clickable
-                       #(reset! *selected-ui-view name)
-                       (ui/dynamic ctx [selected? (= name @*selected-ui-view)
-                                        hovered?  (:hui/hovered? ctx)]
-                         (let [label (ui/padding 20 leading
-                                       (ui/label name font-ui fill-text))]
-                           (cond
-                             selected? (ui/fill (doto (Paint.) (.setColor (unchecked-int 0xFFB2D7FE))) label)
-                             hovered?  (ui/fill (doto (Paint.) (.setColor (unchecked-int 0xFFE1EFFA))) label)
-                             :else     label))))))))]
-            (ui/padding 10 10
-              (atom-checkbox *floating "On top")))
-          [:stretch 1
-           (ui/dynamic _ [name @*selected-ui-view]
-             (ui-views name))])))))
+             (ui/dynamic _ [name @*selected-ui-view]
+               (ui-views name))]))))))
 
 (defn on-paint [window ^Canvas canvas]
   (.clear canvas (unchecked-int 0xFFF6F6F6))
