@@ -158,8 +158,8 @@
                      peeps)
             messages' (into prior-messages messages)]
         (if (contains? alive :peep)
-          [messages' peeps']
-          (reduced [messages' peeps']))))
+          [messages' peeps' alive]
+          (reduced [messages' peeps' alive]))))
     [["Starting Adventure"] peeps]
     encounters))
 
@@ -182,8 +182,9 @@
         _ (println :chosen-peeps (pr-str chosen-peeps))
         {encounters :quest/mobs} quest
         _ (println :encounters (pr-str (first encounters)))
-        [messages peeps'] (process-encounters chosen-peeps encounters)
+        [messages peeps' alive] (process-encounters chosen-peeps encounters)
         _ (println :quest-log (pr-str messages))
+        _ (println :alive (pr-str alive))
         names->peeps' (into {} (map (juxt :peep/name identity)) peeps')
         _ (println :names->peeps' (pr-str names->peeps'))
         peeps' (reduce-kv
