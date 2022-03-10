@@ -201,6 +201,7 @@
       (assoc :peeps peeps')
       (update :tick inc)
       (assoc :power 2)
+      (update :buildings #(into {} (map (fn [[k v]] [k (dissoc v :building/used)])) %))
       (update :player-hp #(max (- % (count dead-peeps)) 0)))))
 
 (defn make-peep [[name class]]
