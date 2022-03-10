@@ -67,6 +67,8 @@
         [n d] [(str->int n) (str->int d)]]
     (basic-roll n d)))
 
+(defn roll->result [dice-seq] (reduce + dice-seq))
+
 (defn selected-peeps [peeps] (into [] (comp (map second) (filter :peep/selected)) peeps))
 
 (defn peep? [entity]
@@ -86,10 +88,10 @@
             [target-name target] (first (shuffle (filter (comp (if p? mob? peep?) second) combatants)))
 
             ;; combat round
-            hit-roll (reduce + (roll (:combat/hit atker)))
+            hit-roll (roll->result (roll (:combat/hit atker)))
             target-def (:combat/def target)
             hits? (> hit-roll target-def)
-            dmg-roll (reduce + (roll (:combat/dmg atker)))
+            dmg-roll (roll->result (roll (:combat/dmg atker)))
             target-hp (:combat/hp target)
             rem-hp (- target-hp dmg-roll)]
         (cond->
