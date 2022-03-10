@@ -1,6 +1,7 @@
 (ns fe-7drl-2022.core
   (:require
    [clojure.string :as str]
+   [clojure.data.finger-tree :refer [double-list conjl]]
    [environ.core :refer [env]]
    [io.github.humbleui.core :as hui]
    [io.github.humbleui.paint :as paint]
@@ -198,7 +199,7 @@
         dead-peeps (into [] (remove alive?) (vals names->peeps'))
         _ (println :dead-peeps (pr-str dead-peeps))]
     (-> state
-      (update-in [:message-log :message-chunks] conj messages)
+      (update-in [:message-log :message-chunks] conjl messages)
       (update-in [:message-log :size] + (count messages))
       (assoc :peeps peeps')
       (update :tick inc)
@@ -246,7 +247,7 @@
    :peeps (into (sorted-map) (into {} (map (juxt first make-peep)) [["Peep 1" (rand-nth [:mage :rogue :fighter :cleric])] ["Peep 2" (rand-nth [:mage :rogue :fighter :cleric])]]))
    :buildings (into (sorted-map) (into {} (map (juxt first make-building)) [["Mage Building" :mage] ["Rogue Building" :rogue] ["Fighter Building" :fighter] ["Cleric Building" :cleric]]))
    :message-log {:size 2
-                 :message-chunks [["Welcome to Fruit Economy!" "Have fun!"]]}})
+                 :message-chunks (double-list ["Welcome to Fruit Economy!" "Have fun!"])}})
 
 (def *state (atom (empty-state)))
 
@@ -530,7 +531,7 @@
          (let [size (count item)
                rem' (- rem size)]
            (cond
-             (< rem size) (reduced (conj v (cond-add-elide (subvec item 0 rem))))
+             (< rem size) (reduced (conj v (cond-add-elide (into [] (take rem) item))))
              (> rem' 0) [rem' (conj v item)]
              (zero? rem') (reduced (conj v item)))))
        [limit []]

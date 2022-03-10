@@ -6,6 +6,7 @@
   :dependencies [[org.clojure/clojure "1.11.0-rc1"]
                  [org.clojure/core.specs.alpha "0.2.62"]
                  [org.clojure/spec.alpha "0.3.218"]
+                 [org.clojure/data.finger-tree "0.0.3"]
                  [environ "1.2.0"]
                  [io.github.humbleui/types "0.1.2" :classifier "clojure"]
                  [io.github.humbleui/jwm "0.4.0" :exclusions [io.github.humbleui/types]]
