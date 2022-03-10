@@ -920,7 +920,7 @@
         y      (-> (:height area) (- height) (/ 2) (+ (:y area)))]
     (doto
       (window/make
-        {:on-close #(reset! *window nil)
+        {:on-close (if (debug?) #(reset! *window nil) #(System/exit 0))
          :on-paint #'on-paint
          :on-event #'on-event})
       (window/set-title "Fruit Economy 👋 - 7DRL 2022")
