@@ -63,11 +63,23 @@
   "Takes dice of the form :2d6"
   [dice]
   (let [dice (if (keyword? dice) (name dice) dice)
-        [_ n d] (re-matches #"(\d+)d(\d+)" dice)
-        [n d] [(str->int n) (str->int d)]]
-    (basic-roll n d)))
+        [_ n d _ op-name mod] (re-matches #"(\d+)d(\d+)((\+|\-)(\d+))?" dice)
+        [n d] [(str->int n) (str->int d)]
+        op (condp = op-name
+             "+" +
+             "-" -
+             identity)]
+    (cond->
+      (vec (basic-roll n d))
+      op-name
+      (conj (partial op (str->int mod))))))
 
-(defn roll->result [dice-seq] (reduce + dice-seq))
+(defn roll->result [dice-seq]
+  (let [calc (fn [acc op-or-val]
+               (if (fn? op-or-val)
+                 (op-or-val acc)
+                 (+ acc op-or-val)))]
+    (reduce calc dice-seq)))
 
 (defn selected-peeps [peeps] (into [] (comp (map second) (filter :peep/selected)) peeps))
 
