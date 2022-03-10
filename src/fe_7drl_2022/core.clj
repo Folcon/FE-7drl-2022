@@ -765,6 +765,42 @@
                    (ui/column
                      (message-log-ui))))])))))))
 
+(def lose-ui-view
+  (ui/on-key-down #(on-key-press (:hui.event.key/key %))
+    (ui/padding padding padding
+      (ui/dynamic ctx [{:keys [scale face-ui]} ctx
+                       peeps (:peeps @*state)]
+        (let [font-large (Font. ^Typeface typeface (float (* scale 26)))
+              font-small (Font. ^Typeface typeface (float (* scale 13)))
+              fill-white (paint/fill 0xFFFFFFFF)
+              fill-black (paint/fill 0xFF000000)
+              fill-yellow (paint/fill 0xFFC9B457)
+              fill-light-gray (paint/fill 0xFFD4D6DA)]
+          (ui/with-context
+            {:font-large      font-large
+             :font-small      font-small
+             :fill-white      fill-white
+             :fill-black      fill-black
+             :fill-light-gray fill-light-gray
+             :fill-dark-gray  (paint/fill 0xFF777C7E)
+             :fill-green      (paint/fill 0xFF6AAA64)
+             :fill-yellow     fill-yellow
+             :stroke-light-gray (paint/stroke 0xFFD4D6DA (* 2 scale))
+             :stroke-dark-gray  (paint/stroke 0xFF777C7E (* 2 scale))}
+            (ui/column
+              (ui/halign 0.5
+                (ui/fill fill-white
+                  (ui/clickable
+                    #(reset! *state (empty-state))
+                    (ui/padding 10 10
+                      (ui/label "↻ Restart" font-small fill-black)))))
+              [:stretch 1 nil]
+              (ui/valign 0.5
+                (ui/halign 0.5
+                  (ui/padding 10 10
+                    (ui/label "You Lose" font-large fill-black))))
+              [:stretch 1 nil])))))))
+
 (def ui-views
   ;; exploiting the fact that as long as array-map doesn't grow, it keeps insertion order
   (array-map
