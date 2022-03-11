@@ -9,7 +9,8 @@
    [io.github.humbleui.window :as window]
    [io.github.humbleui.ui :as ui]
    [fe-7drl-2022.humble-ui :as c-hui]
-   [fe-7drl-2022.components :as cui])
+   [fe-7drl-2022.components :as cui]
+   [fe-7drl-2022.map :refer [gen-world]])
   (:import
    [io.github.humbleui.jwm App EventFrame EventMouseButton EventMouseMove EventMouseScroll EventKey Window]
    [io.github.humbleui.skija Canvas FontMgr FontStyle Typeface Font Paint PaintMode]
@@ -253,7 +254,7 @@
    :tick 0
    :power 2
    :reputation {:goblins 5 :rats 5}
-   :terrain (rand-tile-seqs 10)
+   :terrain (:terrain (gen-world 15 10 {}))
    :typing  ""
    :units (into {} (map (juxt (juxt :x :y) identity)) (repeatedly 10 #(hash-map :x (inc (rand-int 15)) :y (inc (rand-int 10)) :glyph (rand-nth (vals units)))))
    :quests (into (sorted-map) {"Goblins Attack Farm!" {:quest/name "Goblins Attack Farm!" :quest/mobs [(mapv make-goblin ["Goblin 1" "Goblin 2" "Goblin 3"])] :quest/rewards {:copper (roll->result (roll "2d6+2"))} :quest/success {[:reputation :goblins] :inc} :quest/failure {[:reputation :goblins] :dec}}
