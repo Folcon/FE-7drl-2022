@@ -10,6 +10,7 @@
    [io.github.humbleui.ui :as ui]
    [fe-7drl-2022.humble-ui :as c-hui]
    [fe-7drl-2022.components :as cui]
+   [fe-7drl-2022.lists :refer [adjectives]]
    [fe-7drl-2022.map :refer [gen-world]])
   (:import
    [io.github.humbleui.jwm App EventFrame EventMouseButton EventMouseMove EventMouseScroll EventKey Window]
@@ -251,17 +252,54 @@
       (assoc-in [:peeps peep-name] new-peep)
       (dissoc :selected-building))))
 
-(defn generate-world [width height]
-  (let [{:keys [terrain]} (gen-world width height {})]
+(defn generate-world [width height n]
+  (let [{:keys [terrain]} (gen-world width height {})
+        resources (into {} (comp (map (juxt (juxt :x :y) identity)) (filter (fn [[k v]] (let [[x y] k biome (get-in terrain [y x])] (when (not= biome :ocean) [k v]))))) (repeatedly n #(hash-map :x (rand-int width) :y (rand-int height) :glyph (rand-nth (vals resources)))))
+        unit-names (keys units)
+        adjective-names (keys adjectives)
+        units (into {} (comp (map (juxt (juxt :x :y) identity)) (filter (fn [[k v]] (let [[x y] k biome (get-in terrain [y x])] (when (not= biome :ocean) [k v]))))) (repeatedly n #(let [kind (rand-nth unit-names) adjective (rand-nth adjective-names) glyph (get units kind)] (hash-map :x (rand-int width) :y (rand-int height) :name (str (name adjective) " " (name kind) "-kin") :short-name (str (get adjectives adjective) (get units kind)) :glyph glyph))))]
     {:terrain terrain
-     :units (into {} (comp (map (juxt (juxt :x :y) identity)) (filter (fn [[k v]] (let [[x y] k biome (get-in terrain [y x])] (when (not= biome :ocean) [k v]))))) (repeatedly height #(hash-map :x (rand-int width) :y (rand-int height) :glyph (rand-nth (vals units)))))}))
+     :units units
+     :resources resources}))
+
+(defn gen-relations [units]
+  (let [locations (keys units)]
+    (into {}
+      (comp
+        (map
+          (fn [[location {:keys [name] :as tribe}]]
+            {name
+             (apply merge
+               (let [gregariousness (rand-nth [0 1 1 1 2 2 2 2 2 3 3 3 3 4 4 5 5 6])]
+                 (for [_ (range gregariousness)
+                       :let [loc (rand-nth locations)]
+                       :when (not= loc location)]
+                   {(:name (get units loc))
+                    (rand-nth [-3 -2 -1 0 1 2 3])})))}))
+        (remove (fn [v] (nil? (first (vals v))))))
+      units)))
+
+(defn try-generate-world [width height n]
+  (loop [{:keys [terrain units resources]} (generate-world width height n)
+         attempt 0]
+    (println (count units) (< 6 (count units) 12) attempt (> attempt 100))
+    (if (or (< 6 (count units) 12) (> attempt 100))
+      (let [relations (gen-relations units)
+            reputation (into {} (map (fn [v] [(:short-name v) 5])) (vals units))]
+        (println reputation)
+        {:terrain terrain
+         :units (merge units resources)
+         :relations relations
+         :reputation reputation})
+      (recur
+        (generate-world width height n)
+        (inc attempt)))))
 
 (defn empty-state []
   (->
     {:player-hp 10
      :tick 0
      :power 2
-     :reputation {:goblins 5 :rats 5}
      :typing  ""
      :quests (into (sorted-map) {"Goblins Attack Farm!" {:quest/name "Goblins Attack Farm!" :quest/mobs [(mapv make-goblin ["Goblin 1" "Goblin 2" "Goblin 3"])] :quest/rewards {:copper (roll->result (roll "2d6+2"))} :quest/success {[:reputation :goblins] :inc} :quest/failure {[:reputation :goblins] :dec}}
                                  "Cull Local Rats!" {:quest/name "Cull Local Rats!" :quest/mobs [(mapv make-rat ["Rat 1"]) (mapv make-rat ["Rat 1" "Rat 2" "Rat 3"])] :quest/rewards {:copper (roll->result (roll "1d3+2"))} :quest/success {[:reputation :rats] :inc} :quest/failure {[:reputation :rats] :dec}}})
@@ -271,7 +309,7 @@
      :buildings (into (sorted-map) (into {} (map (juxt first make-building)) [["Mage Building" :mage] ["Rogue Building" :rogue] ["Fighter Building" :fighter] ["Cleric Building" :cleric]]))
      :message-log {:size 2
                    :message-chunks (double-list ["Welcome to Fruit Economy!" "Have fun!"])}}
-    (merge (try-generate-world 30 20))))
+    (merge (try-generate-world 30 20 30))))
 
 (def *state (atom (empty-state)))
 
