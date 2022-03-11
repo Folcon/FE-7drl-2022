@@ -252,7 +252,7 @@
 (defn generate-world [width height]
   (let [{:keys [terrain]} (gen-world width height {})]
     {:terrain terrain
-     :units (into {} (map (juxt (juxt :x :y) identity)) (repeatedly height #(hash-map :x (inc (rand-int width)) :y (inc (rand-int 10)) :glyph (rand-nth (vals units)))))}))
+     :units (into {} (comp (map (juxt (juxt :x :y) identity)) (filter (fn [[k v]] (let [[x y] k biome (get-in terrain [y x])] (when (not= biome :ocean) [k v]))))) (repeatedly height #(hash-map :x (rand-int width) :y (rand-int height) :glyph (rand-nth (vals units)))))}))
 
 (defn empty-state []
   (->
