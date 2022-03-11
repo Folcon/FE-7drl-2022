@@ -42,14 +42,16 @@
 
 (def tiles [:beach :desert :forest :grassland :jungle :mountain :snow-mountain :ocean :snow :tundra])
 
-(def units
+(def resources
   {:growing-plant "🌱" :dying-plant "🥀"
    :bush "🌳" :tree-1 "🌴" :tree-2 "🌲" :tree-3 "🌵" :tree-4 "🌾" :tree-5 "🎋" :tree-6 "🎍" :magic-tree "🎄"
    :flower-1 "🌸" :flower-2 "💮" :flower-3 "🏵️" :flower-4 "🌺" :flower-5 "🌻" :flower-6 "🌼" :flower-7 "🌷"
    :herb-1 "🌿" :herb-2 "☘️" :herb-3 "🍀" :herb-4 "🍁" :shroom "🍄" :nut-1 "🌰" :nut-2 "🥥"
    :fruit-1 "🍇" :fruit-2 "🍈" :fruit-3 "🍉" :fruit-4 "🍊" :fruit-5 "🍋" :fruit-6 "🍌" :fruit-7 "🍍" :fruit-8 "🥭"
-   :fruit-9 "🍎" :fruit-10 "🍏" :fruit-11 "🍐" :fruit-12 "🍑" :fruit-13 "🍒" :fruit-14 "🍓" :fruit-15 "🥝" :fruit-16 "🍅"
-   :rabbit "🐇" :deer "🦌" :dragon "🐉" :spider "🕷️"})
+   :fruit-9 "🍎" :fruit-10 "🍏" :fruit-11 "🍐" :fruit-12 "🍑" :fruit-13 "🍒" :fruit-14 "🍓" :fruit-15 "🥝" :fruit-16 "🍅"})
+
+(def units
+  {:rabbit "🐇" :deer "🦌" :dragon "🐉" :spider "🕷️" :rat "🐀" :bear "🐻" :snake "🐍" :frog "🐸"})
 
 (defn rand-tiles [] (vec (take 15 (shuffle tiles))))
 
