@@ -249,6 +249,11 @@
       (assoc-in [:peeps peep-name] new-peep)
       (dissoc :selected-building))))
 
+(defn generate-world [width height]
+  (let [{:keys [terrain]} (gen-world width height {})]
+    {:terrain terrain
+     :units (into {} (map (juxt (juxt :x :y) identity)) (repeatedly height #(hash-map :x (inc (rand-int width)) :y (inc (rand-int 10)) :glyph (rand-nth (vals units)))))}))
+
 (defn empty-state []
   (->
     {:player-hp 10
@@ -256,7 +261,6 @@
      :power 2
      :reputation {:goblins 5 :rats 5}
      :typing  ""
-     :units (into {} (map (juxt (juxt :x :y) identity)) (repeatedly 10 #(hash-map :x (inc (rand-int 15)) :y (inc (rand-int 10)) :glyph (rand-nth (vals units)))))
      :quests (into (sorted-map) {"Goblins Attack Farm!" {:quest/name "Goblins Attack Farm!" :quest/mobs [(mapv make-goblin ["Goblin 1" "Goblin 2" "Goblin 3"])] :quest/rewards {:copper (roll->result (roll "2d6+2"))} :quest/success {[:reputation :goblins] :inc} :quest/failure {[:reputation :goblins] :dec}}
                                  "Cull Local Rats!" {:quest/name "Cull Local Rats!" :quest/mobs [(mapv make-rat ["Rat 1"]) (mapv make-rat ["Rat 1" "Rat 2" "Rat 3"])] :quest/rewards {:copper (roll->result (roll "1d3+2"))} :quest/success {[:reputation :rats] :inc} :quest/failure {[:reputation :rats] :dec}}})
      :selected-quest "Cull Local Rats!"
@@ -265,7 +269,7 @@
      :buildings (into (sorted-map) (into {} (map (juxt first make-building)) [["Mage Building" :mage] ["Rogue Building" :rogue] ["Fighter Building" :fighter] ["Cleric Building" :cleric]]))
      :message-log {:size 2
                    :message-chunks (double-list ["Welcome to Fruit Economy!" "Have fun!"])}}
-    (merge (gen-world 15 10 {}))))
+    (merge (generate-world 15 10))))
 
 (def *state (atom (empty-state)))
 
