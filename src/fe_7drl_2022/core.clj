@@ -353,15 +353,15 @@
                  (paint/fill (render-tile-colour tile)))
           unit-glyph (fn [_tile x y] (get-in units [[x y] :glyph] " "))]
       (ui/column
-        (interpose (ui/gap 0 padding)
+        (interpose (ui/gap 0 1)
           (for [[tile-row y-idx] (map vector terrain (range))]
             (ui/row
-              (interpose (ui/gap padding 0)
+              (interpose (ui/gap 1 0)
                 (for [[tile x-idx] (map vector tile-row (range))]
                   (ui/fill (fill tile)
-                    (ui/width 50
+                    (ui/width 25
                       (ui/halign 0.5
-                        (ui/height 50
+                        (ui/height 25
                           (ui/valign 0.5
                             (ui/label (unit-glyph tile x-idx y-idx) font-large fill-white)))))))))))
         #_
