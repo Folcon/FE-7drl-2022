@@ -625,7 +625,7 @@
                (ui/dynamic ctx [player-hp (:player-hp @*state)]
                  (ui/label (str "Renown " (str player-hp)) font-small fill-black)))
              (ui/dynamic ctx [reputation (:reputation @*state)]
-               (let [rep-str (str/join " " (into [] (comp (map (fn [[k v]] (str k " " v)))) reputation))]
+               (let [rep-str (str/join ", " (into [] (comp (map (fn [[k v]] (str k " " v)))) reputation))]
                  (ui/padding 10 10 0 10
                    (ui/label (str "Reputation [" rep-str "]") font-small fill-black))))
              [:stretch 1 nil]
