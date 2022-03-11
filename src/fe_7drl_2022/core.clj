@@ -271,7 +271,7 @@
      :buildings (into (sorted-map) (into {} (map (juxt first make-building)) [["Mage Building" :mage] ["Rogue Building" :rogue] ["Fighter Building" :fighter] ["Cleric Building" :cleric]]))
      :message-log {:size 2
                    :message-chunks (double-list ["Welcome to Fruit Economy!" "Have fun!"])}}
-    (merge (generate-world 15 10))))
+    (merge (try-generate-world 30 20))))
 
 (def *state (atom (empty-state)))
 
