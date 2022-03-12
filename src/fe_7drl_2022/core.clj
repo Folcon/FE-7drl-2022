@@ -344,6 +344,8 @@
             quests (into (sorted-map) (map (juxt :quest/name identity)) (take 4 (shuffle all-quests)))]
         (println reputation)
         {:terrain terrain
+         :loc->unit (into {} (map (fn [[k v]] [(:name v) k])) units)
+         :name->short-name (into {} (map (fn [[k v]] [(:name v) (:short-name v)])) units)
          :units (merge units resources)
          :relations relations
          :reputation reputation
