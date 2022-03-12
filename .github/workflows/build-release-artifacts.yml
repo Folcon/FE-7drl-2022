@@ -54,6 +54,23 @@ jobs:
         run: echo "${{ steps.app_version.outputs.app_version_arg }}" ; echo "${RELEASE_VERSION}" ; echo "${{ env.RELEASE_VERSION }}"
 
       - name: build package on linux
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16.x'
+          registry-url: 'https://registry.npmjs.org'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: build package on linux
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+        npm install jdeploy
+        ./node_modules/jdeploy/bin/jdeploy.js publish
+        ls && find . -maxdepth 2 -type d -exec ls -ld "{}" \;
+
+      - name: build package on linux
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: jpackage @jpackage/common @jpackage/linux ${{ steps.app_version.outputs.app_version_arg }}
 
