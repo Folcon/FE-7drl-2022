@@ -327,12 +327,17 @@
     (if (or (< 6 (count units) 12) (> attempt 100))
       (let [relations (gen-relations units)
             unit-seq (vals units)
-            reputation (into {} (map (fn [v] [(:short-name v) 5])) unit-seq)]
+            reputation (into {} (map (fn [v] [(:short-name v) 5])) unit-seq)
+            all-quests (into [] (comp (filter #(not= (:short-name %) "You")) (map (fn [{:keys [name short-name dmg def hp special]}] (make-quest name short-name (make-kin dmg def hp special))))) unit-seq)
+            quests (into (sorted-map) (map (juxt :quest/name identity)) (take 4 (shuffle all-quests)))]
         (println reputation)
         {:terrain terrain
          :units (merge units resources)
          :relations relations
-         :reputation reputation})
+         :reputation reputation
+         :all-quests all-quests
+         :quests quests
+         :selected-quest (ffirst quests)})
       (recur
         (generate-world width height n)
         (inc attempt)))))
