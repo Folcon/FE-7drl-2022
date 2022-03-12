@@ -204,7 +204,7 @@
 (defn refresh-quests [all-quests]
   (into (sorted-map) (map (juxt :quest/name identity)) (take 4 (shuffle all-quests))))
 
-(defn process-quest [{:keys [quests selected-quest peeps] :as state}]
+(defn process-quest [{:keys [quests selected-quest peeps all-quests] :as state}]
   (let [quest (get quests selected-quest)
         chosen-peeps (selected-peeps peeps)
         _ (println :quest (pr-str quest))
@@ -228,7 +228,8 @@
                  peeps)
         _ (println :peeps' (pr-str peeps'))
         dead-peeps (into [] (remove alive?) (vals names->peeps'))
-        _ (println :dead-peeps (pr-str dead-peeps))]
+        _ (println :dead-peeps (pr-str dead-peeps))
+        new-quests (refresh-quests all-quests)]
     (-> state
       (update-in [:message-log :message-chunks] conjl messages)
       (update-in [:message-log :size] + (count messages))
@@ -237,6 +238,7 @@
       (assoc :power 2)
       (update :buildings #(into {} (map (fn [[k v]] [k (dissoc v :building/used)])) %))
       (update :player-hp #(max (- % (count dead-peeps)) 0))
+      (assoc :quests new-quests :selected-quest (ffirst new-quests))
       (process-quest-consequences quest (quest-success? alive)))))
 
 (defn make-peep [[name class]]
