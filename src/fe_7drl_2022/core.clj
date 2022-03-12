@@ -792,7 +792,7 @@
                     (ui/label "Info Panel" font-large fill-black))
                   (ui/padding 50
                     (ui/dynamic _ [hover-loc (:hover-loc @*state)]
-                      (let [{:keys [units reputation relations inter-relations name->short-name]} @*state
+                      (let [{:keys [units reputation inter-relations name->short-name]} @*state
                             tribe (get units hover-loc)
                             {:keys [name short-name]} tribe
                             rep (get reputation short-name)
