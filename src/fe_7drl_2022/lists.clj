@@ -13,7 +13,7 @@
    :confused "😕"
    :delightful "😄"
    :elegant "🧐"
-   :expensive "😘"
+   :expressive "😘"
    :frightened "😱"
    :tired "😫"
    :rich "🤑"
