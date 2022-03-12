@@ -15,7 +15,7 @@ jobs:
       matrix:
         os: [
             ubuntu-latest,
-            #macos-latest,
+            macos-latest,
             #windows-latest
         ]
 
@@ -68,10 +68,6 @@ jobs:
         run: |
           npm install jdeploy
           ./node_modules/jdeploy/bin/jdeploy.js publish
-          ls && find . -maxdepth 2 -type d -exec ls -ld "{}" \;
-
-      - name: Quit
-        run: exit 1
 
       - name: build package on linux
         if: ${{ matrix.os == 'ubuntu-latest' }}
@@ -81,10 +77,10 @@ jobs:
         if: ${{ matrix.os == 'macos-latest' }}
         run: jpackage @jpackage/common @jpackage/mac ${{ steps.app_version.outputs.app_version_arg }}
 
-      - name: build package on windows
-        shell: bash
-        if: ${{ matrix.os == 'windows-latest' }}
-        run: jpackage @jpackage/common @jpackage/windows ${{ steps.app_version.outputs.app_version_arg }}
+#      - name: build package on windows
+#        shell: bash
+#        if: ${{ matrix.os == 'windows-latest' }}
+#        run: jpackage @jpackage/common @jpackage/windows ${{ steps.app_version.outputs.app_version_arg }}
 
       - name: rename file on linux
         if: ${{ matrix.os == 'ubuntu-latest' }}
@@ -94,17 +90,21 @@ jobs:
         if: ${{ matrix.os == 'macos-latest' }}
         run: mv Fruit\ Economy-1.0.dmg Fruit_Economy-${{ env.RELEASE_VERSION }}.dmg
 
-      - name: rename file on windows
-        shell: bash
-        if: ${{ matrix.os == 'windows-latest' }}
-        run: mv Fruit\ Economy/ Fruit_Economy/
+      - name: rename windows file on linux
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        run: mv jdeploy/releases/windows/fe7drl-2022.exe.zip Fruit_Economy-${{ env.RELEASE_VERSION }}.zip
 
-      - name: zip + rename file on windows
-        uses: vimtor/action-zip@v1
-        if: ${{ matrix.os == 'windows-latest' }}
-        with:
-          files: Fruit_Economy/
-          dest: Fruit_Economy-${{ env.RELEASE_VERSION }}.zip
+#      - name: rename file on windows
+#        shell: bash
+#        if: ${{ matrix.os == 'windows-latest' }}
+#        run: mv Fruit\ Economy/ Fruit_Economy/
+
+#      - name: zip + rename file on windows
+#        uses: vimtor/action-zip@v1
+#        if: ${{ matrix.os == 'windows-latest' }}
+#        with:
+#          files: Fruit_Economy/
+#          dest: Fruit_Economy-${{ env.RELEASE_VERSION }}.zip
 
       - name: codesign executable on macos
         if: ${{ matrix.os == 'macos-latest' }}
@@ -193,12 +193,19 @@ jobs:
           name: Fruit_Economy-${{ env.RELEASE_VERSION }}.dmg
           path: Fruit_Economy-${{ env.RELEASE_VERSION }}.dmg
 
-      - name: upload artifacts on windows
-        if: ${{ matrix.os == 'windows-latest' }}
+      - name: upload windows artifacts on linux
+        if: ${{ matrix.os == 'ubuntu-latest' }}
         uses: actions/upload-artifact@v2
         with:
           name: Fruit_Economy-${{ env.RELEASE_VERSION }}.zip
           path: Fruit_Economy-${{ env.RELEASE_VERSION }}.zip
+
+#      - name: upload artifacts on windows
+#        if: ${{ matrix.os == 'windows-latest' }}
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: Fruit_Economy-${{ env.RELEASE_VERSION }}.zip
+#          path: Fruit_Economy-${{ env.RELEASE_VERSION }}.zip
 
       - name: release artifacts on linux
         if: ${{ matrix.os == 'ubuntu-latest' }}
@@ -214,12 +221,19 @@ jobs:
           files: |
             Fruit_Economy-${{ env.RELEASE_VERSION }}.dmg
 
-      - name: release artifacts on windows
-        if: ${{ matrix.os == 'windows-latest' }}
+      - name: release windows artifacts on linux
+        if: ${{ matrix.os == 'ubuntu-latest' }}
         uses: softprops/action-gh-release@v1
         with:
           files: |
             Fruit_Economy-${{ env.RELEASE_VERSION }}.zip
+
+#      - name: release artifacts on windows
+#        if: ${{ matrix.os == 'windows-latest' }}
+#        uses: softprops/action-gh-release@v1
+#        with:
+#          files: |
+#            Fruit_Economy-${{ env.RELEASE_VERSION }}.zip
 
   publish:
     needs: build
