@@ -741,11 +741,12 @@
   (ui/on-key-down #(on-key-press (:hui.event.key/key %))
     (ui/padding padding padding
       (ui/dynamic ctx [{:keys [scale face-ui]} ctx]
-        (let [font-small (Font. ^Typeface typeface (float (* scale 13)))
+        (let [font-large (Font. ^Typeface typeface (float (* scale 26)))
+              font-small (Font. ^Typeface typeface (float (* scale 13)))
               fill-black (paint/fill 0xFF000000)
               fill-light-gray (paint/fill 0xFFD4D6DA)]
           (ui/with-context
-            {:font-large      (Font. ^Typeface typeface (float (* scale 26)))
+            {:font-large      font-large
              :font-small      font-small
              :fill-white      (paint/fill 0xFFFFFFFF)
              :fill-black      fill-black
@@ -766,7 +767,22 @@
                         (quest-ui-btn name {:width label-width :code name :selected-quest (:selected-quest @*state)}))))))
               (ui/gap 0 padding)
               [:stretch 1 nil]
-              (ui/halign 0.5 field)
+              (ui/row
+                field
+                (ui/gap padding 0)
+                (ui/column
+                  (ui/padding 50
+                    (ui/label "Info Panel" font-large fill-black))
+                  (ui/padding 50
+                    (ui/dynamic _ [hover-loc (:hover-loc @*state)]
+                      (let [{:keys [units reputation relations inter-relations name->short-name]} @*state
+                            tribe (get units hover-loc)
+                            {:keys [name short-name]} tribe
+                            rep (get reputation short-name)
+                            m (merge tribe
+                                (when rep
+                                  {:reputation rep}))]
+                        (show-map-ui m font-small fill-black))))))
               [:stretch 1 nil]
               (ui/gap 0 padding)
               (ui/halign 0.5 (message-log-ui 6)))))))))
