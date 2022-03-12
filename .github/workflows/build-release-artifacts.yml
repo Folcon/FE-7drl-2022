@@ -69,7 +69,7 @@ jobs:
           npm install jdeploy
           NPM_JSON=$(npm search fe7drl-2022 --json)
           echo $NPM_JSON
-          VERSION=$( echo $NPM_JSON | jq '.[]."version"')
+          VERSION=$( echo $NPM_JSON | jq -r '.[]."version"')
           echo "$VERSION $RELEASE_VERSION"
           if [ "$VERSION" = "$RELEASE_VERSION" ]; then
             echo "Versions are equal so don't publish"
