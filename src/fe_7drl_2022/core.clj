@@ -245,6 +245,14 @@
 (defn make-goblin [name]
   {:mob/name name :combat/stealth "1d20+6" :combat/init "1d20+2" :combat/hit "1d20+4" :combat/dmg "1d6+2" :combat/def 15 :combat/hp 7 :combat/max-hp 7})
 
+(defn make-kin
+  ([dmg def hp] (make-kin dmg def hp {}))
+  ([dmg def hp {:keys [stealth]}]
+   (fn [name]
+     (merge {:mob/name name :combat/init "1d20+2" :combat/hit "1d20+4" :combat/dmg dmg :combat/def def :combat/hp hp :combat/max-hp hp}
+       (when stealth
+         {:combat/stealth stealth})))))
+
 (defn make-building [[name class]]
   {:building/name name :building/class class})
 
