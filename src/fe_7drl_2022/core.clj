@@ -325,6 +325,13 @@
         (remove (fn [v] (nil? (first (vals v))))))
       units)))
 
+(defn make-quest [kin-name kin-short-name make-kin]
+  (let [quest-name (str "Attack " kin-name "s!")
+        quest-structure (rand-nth
+                          [[(mapv make-kin [(str kin-name " 1")]) (mapv make-kin [(str kin-name " 1") (str kin-name " 2") (str kin-name " 3")])]
+                           [(mapv make-kin [(str kin-name " 1") (str kin-name " 2") (str kin-name " 3")])]])]
+    {:quest/name quest-name :quest/mobs quest-structure :quest/rewards {:copper (roll->result (roll "2d6+2"))} :quest/success {[:reputation kin-short-name] :inc} :quest/failure {[:reputation kin-short-name] :dec}}))
+
 (defn try-generate-world [width height n]
   (loop [{:keys [terrain units resources]} (generate-world width height n)
          attempt 0]
@@ -353,9 +360,6 @@
      :tick 0
      :power 2
      :typing  ""
-     :quests (into (sorted-map) {"Goblins Attack Farm!" {:quest/name "Goblins Attack Farm!" :quest/mobs [(mapv make-goblin ["Goblin 1" "Goblin 2" "Goblin 3"])] :quest/rewards {:copper (roll->result (roll "2d6+2"))} :quest/success {[:reputation :goblins] :inc} :quest/failure {[:reputation :goblins] :dec}}
-                                 "Cull Local Rats!" {:quest/name "Cull Local Rats!" :quest/mobs [(mapv make-rat ["Rat 1"]) (mapv make-rat ["Rat 1" "Rat 2" "Rat 3"])] :quest/rewards {:copper (roll->result (roll "1d3+2"))} :quest/success {[:reputation :rats] :inc} :quest/failure {[:reputation :rats] :dec}}})
-     :selected-quest "Cull Local Rats!"
      ;:peep/selected false
      :peeps (into (sorted-map) (into {} (map (juxt first make-peep)) [["Peep 1" (rand-nth [:mage :rogue :fighter :cleric])] ["Peep 2" (rand-nth [:mage :rogue :fighter :cleric])]]))
      :buildings (into (sorted-map) (into {} (map (juxt first make-building)) [["Mage Building" :mage] ["Rogue Building" :rogue] ["Fighter Building" :fighter] ["Cleric Building" :cleric]]))
