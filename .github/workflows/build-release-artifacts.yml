@@ -66,10 +66,10 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          npm install jdeploy node-jq
+          npm install jdeploy
           NPM_JSON=$(npm search fe7drl-2022 --json)
           echo $NPM_JSON
-          VERSION=$( echo $NPM_JSON | ./node_modules/node-jq/bin/jq '.[]."version"')
+          VERSION=$( echo $NPM_JSON | jq '.[]."version"')
           if [ "$VERSION" = "$RELEASE_VERSION" ]; then
             echo "Versions are equal so don't publish"
           else
