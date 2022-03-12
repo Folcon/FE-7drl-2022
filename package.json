@@ -1,5 +1,7 @@
 {
-    "bin": {"fe7drl-2022": "jdeploy-bundle/jdeploy.js"},
+    "bin": {
+        "fe7drl-2022": "jdeploy-bundle/jdeploy.js"
+    },
     "author": "folcon",
     "description": "This is my 7drl 2022 submission",
     "main": "index.js",
@@ -20,11 +22,16 @@
     },
     "dependencies": {
         "njre": "^0.2.0",
+        "node-jq": "^2.1.0",
         "shelljs": "^0.8.4"
     },
     "license": "ISC",
     "name": "fe7drl-2022",
-    "files": ["jdeploy-bundle"],
-    "scripts": {"test": "echo \"Error: no test specified\" && exit 1"},
+    "files": [
+        "jdeploy-bundle"
+    ],
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
     "homepage": "https://folcon.itch.io/fruit-economy-7drl-2022"
 }

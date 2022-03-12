@@ -66,8 +66,14 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          npm install jdeploy
-          ./node_modules/jdeploy/bin/jdeploy.js publish
+          npm install jdeploy node-jq
+          VERSION=$(npm search fe7drl-2022 --json |  ./node_modules/node-jq/bin/jq  '.[]."version"')
+          if [ "$VERSION" = "$RELEASE_VERSION" ]; then
+            echo "Versions are equal so don't publish"
+          else
+            echo "Versions are not equal so publish"
+            ./node_modules/jdeploy/bin/jdeploy.js publish
+          fi
 
       - name: build package on linux
         if: ${{ matrix.os == 'ubuntu-latest' }}
