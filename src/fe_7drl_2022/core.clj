@@ -452,12 +452,18 @@
             (ui/row
               (interpose (ui/gap 1 0)
                 (for [[tile x-idx] (map vector tile-row (range))]
-                  (ui/fill (fill tile)
-                    (ui/width 25
-                      (ui/halign 0.5
-                        (ui/height 25
-                          (ui/valign 0.5
-                            (ui/label (unit-glyph tile x-idx y-idx) font-large fill-white)))))))))))
+                  (ui/hoverable
+                    (ui/dynamic ctx [hovered? (:hui/hovered? ctx)]
+                      (let [_ (when hovered?
+                                (swap! *state assoc :hover-loc [x-idx y-idx]))]
+                        (ui/fill (if hovered?
+                                   (doto (Paint.) (.setColor (unchecked-int 0xFFE1EFFA)))
+                                   (fill tile))
+                          (ui/width 25
+                            (ui/halign 0.5
+                              (ui/height 25
+                                (ui/valign 0.5
+                                  (ui/label (unit-glyph tile x-idx y-idx) font-large fill-white))))))))))))))
         #_
         (when-not (won? state)
           (let [colors (colours word guesses)]
