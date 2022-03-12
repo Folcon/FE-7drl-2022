@@ -66,9 +66,9 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-        npm install jdeploy
-        ./node_modules/jdeploy/bin/jdeploy.js publish
-        ls && find . -maxdepth 2 -type d -exec ls -ld "{}" \;
+          npm install jdeploy
+          ./node_modules/jdeploy/bin/jdeploy.js publish
+          ls && find . -maxdepth 2 -type d -exec ls -ld "{}" \;
 
       - name: Quit
         run: exit 1
