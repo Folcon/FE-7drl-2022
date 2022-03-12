@@ -308,6 +308,17 @@
      :units with-player
      :resources resources}))
 
+(defn val->rel-glyph [v]
+  (condp = v
+    -3 "☠️"
+    -2 "💩"
+    -1 "🤡"
+    0 "🤷"
+    1 "👍"
+    2 "🤝"
+    3 "❤️"
+    "🤷"))
+
 (defn gen-relations [units]
   (let [locations (keys units)]
     (into {}
@@ -796,9 +807,12 @@
                             tribe (get units hover-loc)
                             {:keys [name short-name]} tribe
                             rep (get reputation short-name)
+                            rel (into [] (comp (filter (comp #(contains? % name) set first)) (map (fn [[k v]] [(str/join ">  <" (map (comp (partial str/join "=") vector) (mapv name->short-name k) (mapv val->rel-glyph v)))]))) inter-relations)
                             m (merge tribe
                                 (when rep
-                                  {:reputation rep}))]
+                                  {:reputation rep})
+                                (when (seq rel)
+                                  {:relations rel}))]
                         (show-map-ui m font-small fill-black))))))
               [:stretch 1 nil]
               (ui/gap 0 padding)
