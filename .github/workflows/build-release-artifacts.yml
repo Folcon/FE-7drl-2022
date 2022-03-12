@@ -73,6 +73,7 @@ jobs:
           echo "$VERSION $RELEASE_VERSION"
           if [ "$VERSION" = "$RELEASE_VERSION" ]; then
             echo "Versions are equal so don't publish"
+            ./node_modules/jdeploy/bin/jdeploy.js package
           else
             echo "Versions are not equal so publish"
             ./node_modules/jdeploy/bin/jdeploy.js publish
