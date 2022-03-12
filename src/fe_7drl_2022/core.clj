@@ -201,6 +201,9 @@
     state
     (if success? success failure)))
 
+(defn refresh-quests [all-quests]
+  (into (sorted-map) (map (juxt :quest/name identity)) (take 4 (shuffle all-quests))))
+
 (defn process-quest [{:keys [quests selected-quest peeps] :as state}]
   (let [quest (get quests selected-quest)
         chosen-peeps (selected-peeps peeps)
