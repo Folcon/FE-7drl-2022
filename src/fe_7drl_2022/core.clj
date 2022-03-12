@@ -54,6 +54,16 @@
 (def units
   {:rabbit "🐇" :deer "🦌" :dragon "🐉" :spider "🕷️" :rat "🐀" :bear "🐻" :snake "🐍" :frog "🐸"})
 
+(def stats
+  {:rabbit {:dmg "2d3-2" :def 10 :hp 3 :special {:stealth "1d20+12"}}
+   :deer {:dmg "2d6+4" :def 12 :hp 12}
+   :dragon {:dmg "3d6+3" :def 18 :hp 20}
+   :spider {:dmg "3d3-1" :def 12 :hp 4 :special {:stealth "1d20+10"}}
+   :rat {:dmg "2d3-4" :def 14 :hp 2 :special {:stealth "1d20+16"}}
+   :bear {:dmg "2d6+2" :def 14 :hp 15}
+   :snake {:dmg "1d6+3" :def 12 :hp 7 :special {:stealth "1d20+6"}}
+   :frog {:dmg "1d6+2" :def 14 :hp 5 :special {:stealth "1d20+4"}}})
+
 (defn rand-tiles [] (vec (take 15 (shuffle tiles))))
 
 (defn rand-tile-seqs [n] (vec (repeatedly n rand-tiles)))
