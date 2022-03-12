@@ -262,14 +262,37 @@
       (assoc-in [:peeps peep-name] new-peep)
       (dissoc :selected-building))))
 
+(defn spawn-player [width height terrain units]
+  (let [player-location
+        (loop [x (rand-int width) y (rand-int height)
+               attempt 0]
+          (cond
+            (> attempt 100)
+            (ffirst units) ;; we just take over an existing space
+
+            (and
+              (not= (get-in terrain [y x]) :ocean)
+              (contains? units [x y]))
+            [x y]
+
+            :else
+            (recur
+              (rand-int width)
+              (rand-int height)
+              (inc attempt))))
+        [x y] player-location]
+    (assoc units player-location {:x x :y y :glyph "🧙" :name "You the Player" :short-name "You"})))
+
 (defn generate-world [width height n]
   (let [{:keys [terrain]} (gen-world width height {})
         resources (into {} (comp (map (juxt (juxt :x :y) identity)) (filter (fn [[k v]] (let [[x y] k biome (get-in terrain [y x])] (when (not= biome :ocean) [k v]))))) (repeatedly n #(hash-map :x (rand-int width) :y (rand-int height) :glyph (rand-nth (vals resources)))))
         unit-names (keys units)
         adjective-names (keys adjectives)
-        units (into {} (comp (map (juxt (juxt :x :y) identity)) (filter (fn [[k v]] (let [[x y] k biome (get-in terrain [y x])] (when (not= biome :ocean) [k v]))))) (repeatedly n #(let [kind (rand-nth unit-names) adjective (rand-nth adjective-names) glyph (get units kind)] (hash-map :x (rand-int width) :y (rand-int height) :name (str (name adjective) " " (name kind) "-kin") :short-name (str (get adjectives adjective) (get units kind)) :glyph glyph))))]
+        units (into {} (comp (map (juxt (juxt :x :y) identity)) (filter (fn [[k v]] (let [[x y] k biome (get-in terrain [y x])] (when (not= biome :ocean) [k v]))))) (repeatedly n #(let [kind (rand-nth unit-names) adjective (rand-nth adjective-names) glyph (get units kind)] (merge {:x (rand-int width) :y (rand-int height) :name (str (name adjective) " " (name kind) "-kin") :short-name (str (get adjectives adjective) (get units kind)) :glyph glyph} (get stats kind)))))
+        with-player (spawn-player width height terrain units)]
+    (println (count units) :units units)
     {:terrain terrain
-     :units units
+     :units with-player
      :resources resources}))
 
 (defn gen-relations [units]
