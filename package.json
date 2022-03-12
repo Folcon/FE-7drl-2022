@@ -1,0 +1,30 @@
+{
+    "bin": {"fe7drl-2022": "jdeploy-bundle/jdeploy.js"},
+    "author": "folcon",
+    "description": "This is my 7drl 2022 submission",
+    "main": "index.js",
+    "preferGlobal": true,
+    "repository": "",
+    "version": "0.0.7",
+    "jdeploy": {
+        "jdk": false,
+        "javaVersion": "17",
+        "bundles": [
+            "mac",
+            "win",
+            "linux"
+        ],
+        "jar": "target/fruit-economy-standalone.jar",
+        "javafx": false,
+        "title": "Fruit Economy - 7drl 2022"
+    },
+    "dependencies": {
+        "njre": "^0.2.0",
+        "shelljs": "^0.8.4"
+    },
+    "license": "ISC",
+    "name": "fe7drl-2022",
+    "files": ["jdeploy-bundle"],
+    "scripts": {"test": "echo \"Error: no test specified\" && exit 1"},
+    "homepage": "https://folcon.itch.io/fruit-economy-7drl-2022"
+}
