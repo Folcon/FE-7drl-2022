@@ -326,7 +326,8 @@
     (println (count units) (< 6 (count units) 12) attempt (> attempt 100))
     (if (or (< 6 (count units) 12) (> attempt 100))
       (let [relations (gen-relations units)
-            reputation (into {} (map (fn [v] [(:short-name v) 5])) (vals units))]
+            unit-seq (vals units)
+            reputation (into {} (map (fn [v] [(:short-name v) 5])) unit-seq)]
         (println reputation)
         {:terrain terrain
          :units (merge units resources)
