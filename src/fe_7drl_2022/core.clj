@@ -325,6 +325,19 @@
         (remove (fn [v] (nil? (first (vals v))))))
       units)))
 
+(defn gen-inter-relations [relations]
+  (reduce-kv
+    (fn [relate our-name relation-map]
+      (merge relate
+        (reduce-kv
+          (fn [relate their-name relation-val]
+            (println our-name their-name [relation-val (get (get relations their-name) our-name)])
+            (assoc relate [our-name their-name] [relation-val (get (get relations their-name) our-name)]))
+          relate
+          relation-map)))
+    {}
+    relations))
+
 (defn make-quest [kin-name kin-short-name make-kin]
   (let [quest-name (str "Attack " kin-name "s!")
         quest-structure (rand-nth
@@ -338,6 +351,7 @@
     (println (count units) (< 6 (count units) 12) attempt (> attempt 100))
     (if (or (< 6 (count units) 12) (> attempt 100))
       (let [relations (gen-relations units)
+            inter-relations (gen-inter-relations relations)
             unit-seq (vals units)
             reputation (into {} (map (fn [v] [(:short-name v) 5])) unit-seq)
             all-quests (into [] (comp (filter #(not= (:short-name %) "You")) (map (fn [{:keys [name short-name dmg def hp special]}] (make-quest name short-name (make-kin dmg def hp special))))) unit-seq)
@@ -348,6 +362,7 @@
          :name->short-name (into {} (map (fn [[k v]] [(:name v) (:short-name v)])) units)
          :units (merge units resources)
          :relations relations
+         :inter-relations inter-relations
          :reputation reputation
          :all-quests all-quests
          :quests quests
